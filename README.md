@@ -6,6 +6,8 @@ trading: **context → location → confirmation**.
 Strategy source and the full feasibility analysis: [`docs/strategy-spec.md`](docs/strategy-spec.md).
 Original (broken) files kept for diff purposes in [`legacy/`](legacy/).
 
+**First time running it? Follow [`RUNBOOK.md`](RUNBOOK.md).**
+
 ## Quick start
 
 ```bash
@@ -18,6 +20,7 @@ ALPACA_SECRET_KEY=your_secret_here
 KEYS
 
 # offline check -- no network, no credentials needed
+python -m elder.preflight --scan   # check everything before the open
 python -m tests.test_pipeline
 
 # dry run: scans and logs setups, places NO orders
