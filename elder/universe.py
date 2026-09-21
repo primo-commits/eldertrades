@@ -186,6 +186,31 @@ EQUITY_HIGHBETA: list[Instrument] = [
 LEVERAGED_EXCLUDED = ["TQQQ", "SQQQ", "SOXL", "SOXS", "TNA", "TZA",
                       "LABU", "LABD", "SPXU", "UVXY", "VIXY", "TSLL"]
 
+# ── Additional index / broad-market ETFs ─────────────────────────────────────
+# Worth stating plainly: broad indices are LOW volatility by construction --
+# that is what diversification does. Most of these will fail the economics
+# screen at a 5% position cap because they cannot move enough to pay. They
+# become viable as the position cap rises. The volatility lives in sectors,
+# single names and leveraged products, not in broader indices.
+INDEX_EXTRA: list[Instrument] = [
+    _i("RSP",  "equity", "index", 2, "Equal-weight S&P 500; different tilt to SPY"),
+    _i("VTI",  "equity", "index", 3, "Total US market; lowest ATR of the group"),
+    _i("QQQM", "equity", "index", 3, "Nasdaq 100, cheaper share class; thinner than QQQ"),
+    _i("OEF",  "equity", "index", 3, "S&P 100 mega-cap"),
+    _i("XLG",  "equity", "index", 3, "Top 50 mega-cap"),
+    _i("IJH",  "equity", "index", 3, "S&P Mid-Cap 400"),
+    _i("IJR",  "equity", "index", 3, "S&P Small-Cap 600"),
+    _i("IWF",  "equity", "index", 3, "Russell 1000 Growth"),
+    _i("IWD",  "equity", "index", 3, "Russell 1000 Value"),
+    _i("IWO",  "equity", "index", 2, "Russell 2000 Growth; higher ATR than IWM"),
+    _i("IWN",  "equity", "index", 3, "Russell 2000 Value"),
+    _i("ACWI", "equity", "intl_eu", 3, "All-country world"),
+    _i("VEA",  "equity", "intl_eu", 3, "Developed ex-US"),
+    _i("VWO",  "equity", "intl_eu", 3, "Emerging markets"),
+    _i("VXX",  "equity", "index", 3, "VIX futures ETN -- very high ATR but decays; "
+                                     "treat as a separate strategy, not an index"),
+]
+
 # ── Tier 4: international exposure via US-listed proxies ─────────────────────
 # Alpaca lists US securities only -- no TSE, LSE, Euronext or Xetra. These are
 # US-listed ETFs and ADRs that TRACK those markets and trade on NYSE/NASDAQ.
@@ -232,19 +257,26 @@ INTL: list[Instrument] = [
 # ── Recommended starting universe for a $1M book ─────────────────────────────
 STARTER_SYMBOLS = [
     # SPY and QQQ lead: the direct ES/NQ analogues Elder actually trades.
-    "SPY", "QQQ", "IWM", "SMH", "XLF", "XLE", "XLK", "XBI", "GDX", "TLT", "HYG", "SLV",
+    "SPY", "QQQ", "IWM", "SMH", "XLF", "XLE", "XLK", "XBI", "GDX", "SLV", "IWO",
     "NVDA", "AAPL", "MSFT", "AMZN", "META", "TSLA", "AMD", "JPM",
 ]
+
+# TLT and HYG were removed from the starter set on 2026-09-21. Measured live:
+# HYG 5-min ATR 0.055%, TLT 0.068%. A winning trade nets $55-90 at a 5% cap and
+# gives back 15-23% of that in spread and slippage. They are structurally
+# unable to pay for themselves in an intraday strategy. They remain in
+# ETF_CORE for completeness; the economics screen will reject them anyway.
 
 # Europe only, and only in the 09:30-11:30 ET overlap when the underlying market
 # is genuinely open. Japan is deliberately excluded -- see the INTL note.
 INTL_TRIAL_SYMBOLS = ["FEZ", "VGK", "ASML", "EWG", "EWU"]
 
-ALL: list[Instrument] = ETF_CORE + EQUITY_LARGE + EQUITY_HIGHBETA + INTL
+ALL: list[Instrument] = ETF_CORE + INDEX_EXTRA + EQUITY_LARGE + EQUITY_HIGHBETA + INTL
 BY_SYMBOL: dict[str, Instrument] = {x.symbol: x for x in ALL}
 
 TIERS: dict[str, list[Instrument]] = {
     "etf_core":     ETF_CORE,
+    "index":        [x for x in ETF_CORE + INDEX_EXTRA if x.bucket == "index"],
     "equity_large": EQUITY_LARGE,
     "equity_highbeta": EQUITY_HIGHBETA,
     "intl":         INTL,

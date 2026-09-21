@@ -82,6 +82,28 @@ reconcile:
   auto_protect: true             # flatten any position found without a stop
 
 screening:
+  # An instrument earns its place only if a WINNING trade clears this net
+  # figure at the sizing you actually run. Evaluated on LIVE data each scan.
+  #
+  # IMPORTANT: this floor and max_position_notional_pct are ONE decision.
+  # At a 5% cap you need ~0.24% ATR to net $300, which cuts SPY and QQQ.
+  # At 15% you need ~0.08%, which nearly everything clears.
+  # ATR needed to clear the floor, by position cap:
+  #            $150 floor   $300 floor
+  #   cap  5%     0.122%      0.238%
+  #   cap 10%     0.061%      0.119%
+  #   cap 15%     0.041%      0.079%
+  #   cap 25%     0.024%      0.048%
+  min_net_per_trade: 150
+  # Never screened out on economics, whatever the floor says. SPY and QQQ are
+  # the ES and NQ proxies -- the instruments this strategy is actually about --
+  # and at a 5% cap SPY sits right on the $150 boundary (it needs 0.122% 5-min
+  # ATR, and commonly runs 0.06-0.14%). Without this it would drop in and out
+  # day to day. The scan logs when an exempt symbol would otherwise have been
+  # cut, so the cost stays visible.
+  always_include: ["SPY", "QQQ"]
+  est_spread_per_share: 0.01     # one cent, typical for liquid US equities
+  est_slippage_bps: 1.0          # each way, on a market order
   min_price: 10.0
   min_adv_notional: 50_000_000
   full_size_adv_notional: 200_000_000

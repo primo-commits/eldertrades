@@ -58,6 +58,10 @@ class ExecutionConfig:
 
 @dataclass(frozen=True)
 class ScreeningConfig:
+    min_net_per_trade: float
+    always_include: list[str]
+    est_spread_per_share: float
+    est_slippage_bps: float
     min_price: float
     min_adv_notional: float
     full_size_adv_notional: float

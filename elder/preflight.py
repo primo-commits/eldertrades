@@ -237,6 +237,28 @@ def run(tier: str | None = None, do_scan: bool = False,
     except Exception as e:
         c.fail(f"market data failed: {e}")
 
+    # ── 7b. economics screen ────────────────────────────────────────────────
+    if frames_by_symbol:
+        c.section("7b. Economics screen")
+        try:
+            from . import screening
+            base = cfg.data.base_timeframe
+            eb = {s: f[base] for s, f in frames_by_symbol.items()
+                  if base in f and f[base] is not None and not f[base].empty}
+            ok_syms, econ = screening.screen(eb, equity=equity, cfg=cfg)
+            for line in screening.report(
+                    econ, min_net=cfg.screening.min_net_per_trade).splitlines():
+                print(f"       {line}")
+            drops = [e for e in econ if not e.passes]
+            if drops:
+                c.warn(f"{len(drops)} symbol(s) cannot clear the "
+                       f"${cfg.screening.min_net_per_trade:,.0f} net floor and will "
+                       f"be skipped: {', '.join(e.symbol for e in drops)}")
+            else:
+                c.ok("every symbol clears the net floor")
+        except Exception as e:
+            c.warn(f"economics screen failed: {e}")
+
     # ── 8. filesystem ───────────────────────────────────────────────────────
     c.section("8. Filesystem")
     for d in ("logs", "journal", "state"):

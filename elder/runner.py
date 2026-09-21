@@ -18,7 +18,7 @@ from pathlib import Path
 import pandas as pd
 
 from . import config as cfgmod
-from . import journal, strategy, universe
+from . import journal, screening, strategy, universe
 from .broker import Broker, make_trading_client
 from .data import MarketData, pandas_rule, regular_session, session_anchored
 from .keys import MissingCredentials
@@ -127,6 +127,24 @@ def scan_once(md, broker, risk, cfg, symbols, *, dry_run: bool) -> dict:
              f"{equity:,.2f}", len(positions), "DRY RUN" if dry_run else "LIVE")
 
     data = fetch_all(md, symbols, cfg)
+
+    # Economics screen: an instrument earns its place only if a winning trade
+    # clears the net floor at the sizing actually in use. Runs on live data so
+    # it adapts to the volatility regime.
+    base = cfg.data.base_timeframe
+    exec_bars = {s: f[base] for s, f in data.items() if base in f and not f[base].empty}
+    tradeable, econ = screening.screen(exec_bars, equity=equity, cfg=cfg)
+    dropped = [e for e in econ if not e.passes]
+    kept_exempt = [e for e in econ if e.exempt and e.net_win < cfg.screening.min_net_per_trade]
+    if dropped:
+        log.info("screen: %d symbol(s) below the $%s net floor -- %s",
+                 len(dropped), f"{cfg.screening.min_net_per_trade:,.0f}",
+                 ", ".join(f"{e.symbol} (${e.net_win:,.0f})" for e in dropped))
+    for e in kept_exempt:
+        log.info("screen: %s kept by always_include despite netting only $%,.0f"
+                 .replace(",", ""), e.symbol, e.net_win)
+    allowed = set(tradeable)
+
     setups, rejections, orders = [], [], []
 
     for sym in symbols:
@@ -136,6 +154,11 @@ def scan_once(md, broker, risk, cfg, symbols, *, dry_run: bool) -> dict:
             continue
         if sym.replace("/", "") in held:
             rejections.append(strategy.Rejection(sym, "location", "already holding"))
+            continue
+        if sym not in allowed:
+            rec = next((e for e in econ if e.symbol == sym), None)
+            rejections.append(strategy.Rejection(
+                sym, "screen", rec.reason if rec else "failed the economics screen"))
             continue
 
         try:
