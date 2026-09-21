@@ -150,15 +150,25 @@ def _walk_forward(cfg, data, equity, a) -> int:
     print(f"\nWALK-FORWARD: {len(windows)} windows, "
           f"train {a.train}d / test {a.test}d, over {len(sessions)} sessions\n")
 
+    # Each window needs PRECEDING history or it starts cold. The 4H bias needs
+    # ~14 sessions before a pivot confirms and find_zones needs 26 bars per
+    # timeframe, so a bare 20-session window can never produce context.
+    warmup = dt.timedelta(days=cfg.data.lookback_days)
+
     results, rows = [], []
+    agg_skip: dict[str, int] = {}
     for i, w in enumerate(windows, 1):
-        test = {s: d[(d.index.date >= w.test_start) & (d.index.date <= w.test_end)]
+        lo = w.test_start - warmup
+        test = {s: d[(d.index.date >= lo) & (d.index.date <= w.test_end)]
                 for s, d in data.items()}
         test = {s: d for s, d in test.items() if len(d) > 100}
         if not test:
             continue
         r = engine.run(test, cfg, starting_equity=equity,
-                       rescan_bars=a.rescan_bars, seed=a.seed + i)
+                       rescan_bars=a.rescan_bars, seed=a.seed + i,
+                       trade_from=w.test_start)
+        for k, v in r.skipped.items():
+            agg_skip[k] = agg_skip.get(k, 0) + v
         m = metrics.compute(r.trades, r.equity_curve, equity)
         results.append(r)
         rows.append({"window": i, "test_start": w.test_start, "test_end": w.test_end,
@@ -173,6 +183,11 @@ def _walk_forward(cfg, data, equity, a) -> int:
     m = metrics.compute(trades, eq, equity)
     print()
     print(metrics.report(m, "OUT-OF-SAMPLE (all test windows combined)"))
+    print("\n  WHY NOTHING FIRED (aggregated across every window):")
+    tot = sum(v for k, v in agg_skip.items() if "warm-up" not in k)
+    for k, v in sorted(agg_skip.items(), key=lambda x: -x[1])[:10]:
+        share = f"{v / tot:>5.0%}" if tot and "warm-up" not in k else "     "
+        print(f"    {k:<32} {v:>9,}  {share}")
     df = pd.DataFrame(rows)
     df.to_csv(OUT / "walk_forward.csv", index=False)
     if len(df):

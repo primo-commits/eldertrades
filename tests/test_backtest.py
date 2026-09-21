@@ -118,6 +118,61 @@ def test_ambiguous_bar_assumes_the_stop():
     print(f"  both touched -> resolved as {f.reason} at {f.price} (conservative)")
 
 
+def test_cold_window_cannot_produce_context():
+    """
+    The walk-forward bug, pinned.
+
+    A test window sliced to its own dates alone starts with NO history. The 4H
+    bias needs ~14 sessions before a single pivot confirms and find_zones needs
+    26 bars per timeframe, so a bare 20-session window cannot produce context
+    at all. The first real walk-forward run returned 0 trades in all 9 windows
+    over 275 sessions because of exactly this.
+    """
+    cfg = cfgmod.load()
+    full = synthetic(["AAA"], sessions=90, seed=4)["AAA"]
+    days = sorted({t.date() for t in full.index})
+    window = days[-20:]
+    cold = full[[t.date() in set(window) for t in full.index]]
+
+    frames_cold = engine.build_frames(cold, cfg)
+    bias_tf = cfg.strategy.context["structure_timeframe"]
+    n_cold = len(frames_cold[bias_tf])
+
+    warm = full[[t.date() >= days[-60] for t in full.index]]
+    n_warm = len(engine.build_frames(warm, cfg)[bias_tf])
+
+    print(f"  cold 20-session window -> {n_cold} {bias_tf} bars")
+    print(f"  with 40 sessions warm-up -> {n_warm} {bias_tf} bars")
+    assert n_warm > n_cold * 2, "warm-up must supply materially more history"
+
+    # And the zone finder simply refuses below its minimum.
+    from elder.zones import find_zones
+    z_cold = find_zones(frames_cold[bias_tf], timeframe=bias_tf)
+    print(f"  zones findable on the cold {bias_tf} frame: {len(z_cold)} "
+          f"(needs >= 26 bars, has {n_cold})")
+
+
+def test_trade_from_suppresses_entries_but_still_warms_up():
+    """`trade_from` must gate ENTRIES only -- bars before it still build state."""
+    import datetime as dt
+    cfg = cfgmod.load()
+    data = synthetic(["AAA", "BBB"], sessions=60, seed=6)
+    days = sorted({t.date() for t in data["AAA"].index})
+    cutoff = days[-15]
+
+    r = engine.run(data, cfg, starting_equity=1_000_000, rescan_bars=26,
+                   seed=5, trade_from=cutoff)
+    assert all(t.opened_at.date() >= cutoff for t in r.trades), \
+        "no position may be opened before trade_from"
+    assert r.skipped.get("warm-up bars (not traded)", 0) > 0, \
+        "warm-up bars should be counted, proving they were processed"
+    assert len(r.equity_curve) == 0 or min(t.date() for t in r.equity_curve.index) >= cutoff, \
+        "the equity curve must be trimmed to the traded period"
+    print(f"  warm-up bars processed but not traded: "
+          f"{r.skipped['warm-up bars (not traded)']:,}")
+    print(f"  trades, all on or after {cutoff}: {len(r.trades)}")
+
+
 def test_cash_is_conserved():
     """E23. Every fill moves cash; the ledger must reconcile exactly."""
     pf = Portfolio(starting_equity=100_000.0)
@@ -174,6 +229,8 @@ if __name__ == "__main__":
                test_entry_fills_at_next_bar_open_not_signal_close,
                test_gap_through_stop_fills_at_the_open,
                test_ambiguous_bar_assumes_the_stop,
+               test_cold_window_cannot_produce_context,
+               test_trade_from_suppresses_entries_but_still_warms_up,
                test_cash_is_conserved,
                test_same_seed_is_reproducible,
                test_walk_forward_windows_do_not_overlap,

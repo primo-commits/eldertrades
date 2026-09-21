@@ -136,6 +136,14 @@ python -m backtest.run --sweep --days 180          # parameter grid (in-sample)
 
 Or `6-BACKTEST.bat` on Windows.
 
+**Each test window is given `data.lookback_days` of preceding history as
+warm-up.** Bars before `test_start` are processed so structure, zones and
+indicators build up, but no position may be opened until the test period
+begins. Without this a window starts cold: the 4H bias needs roughly 14
+sessions before a single pivot confirms, and `find_zones` needs 26 bars per
+timeframe, so a bare 20-session window cannot produce context at all and
+records zero trades regardless of the strategy.
+
 **Only the walk-forward number means anything.** A single pass over all data is
 in-sample: it tells you how well the parameters fit that period, not whether
 there is an edge. Walk-forward optimises on one window, evaluates on the next

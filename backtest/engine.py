@@ -127,7 +127,8 @@ def run(bars_by_symbol: dict[str, pd.DataFrame], cfg, *,
         rescan_bars: int = 26,
         seed: int = 12345,
         costs: CostModel | None = None,
-        params: dict | None = None) -> BacktestResult:
+        params: dict | None = None,
+        trade_from: dt.date | None = None) -> BacktestResult:
     """
     Replay the strategy bar by bar.
 
@@ -135,6 +136,14 @@ def run(bars_by_symbol: dict[str, pd.DataFrame], cfg, *,
     random draws and are genuinely comparable (E21). The original seeded the
     global RNG once and let a 100-combination sweep consume different slices of
     the stream, making combos incomparable.
+
+    `trade_from` marks the first date on which positions may be OPENED. Bars
+    before it are still processed so indicators, structure and zones warm up.
+    Without this a walk-forward test window starts cold: the 4H bias needs
+    roughly 14 sessions of history before a single pivot confirms, and
+    find_zones needs 26 bars per timeframe, so a 20-session window spends most
+    of itself unable to produce any context at all and records zero trades --
+    which is exactly what the first walk-forward run showed.
     """
     rng = random.Random(seed)
     costs = costs or CostModel(
@@ -148,6 +157,7 @@ def run(bars_by_symbol: dict[str, pd.DataFrame], cfg, *,
 
     all_ts = sorted({t for f in frames.values() for t in f[base].index})
     sessions = sorted({t.date() for t in all_ts})
+    warmup_skipped = 0
     pf = Portfolio(starting_equity=starting_equity)
     curve: list[tuple[dt.datetime, float]] = []
     skipped: dict[str, int] = {}
@@ -211,7 +221,10 @@ def run(bars_by_symbol: dict[str, pd.DataFrame], cfg, *,
             if last_bar:
                 continue
 
-            # ---- 3. daily risk gate ---------------------------------------
+            # ---- 3. warm-up and daily risk gates --------------------------
+            if trade_from is not None and day < trade_from:
+                warmup_skipped += 1
+                continue
             if pf.is_halted(day):
                 continue
             if pf.daily_loss(prices) >= pf.session_start_equity * cfg.risk.daily_loss_limit_pct:
@@ -306,4 +319,7 @@ def run(bars_by_symbol: dict[str, pd.DataFrame], cfg, *,
         pf.halted_until = None
 
     eq = pd.Series({t: v for t, v in curve}).sort_index()
+    if trade_from is not None and len(eq):
+        eq = eq[[t.date() >= trade_from for t in eq.index]]
+        skipped["warm-up bars (not traded)"] = warmup_skipped
     return BacktestResult(pf.closed, eq, starting_equity, params or {}, skipped)
