@@ -212,6 +212,11 @@ class RiskEngine:
 
         return RiskDecision(True, "ok", sizing)
 
+    def halt(self, reason: str) -> None:
+        """Stop all new entries. Called by the reconciler when a position
+        cannot be closed -- if we cannot exit, we must not enter."""
+        self._halt(reason)
+
     def _halt(self, reason: str) -> None:
         self.state.halted = True
         self.state.halt_reason = reason

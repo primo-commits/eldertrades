@@ -52,8 +52,17 @@ orderflow:
 execution:
   dry_run: true                  # SAFE BY DEFAULT -- --live is required to trade
   scan_interval_minutes: 5
-  order_type: bracket            # equities only; crypto has no bracket support
-  time_in_force: day
+  order_type: bracket            # bracket = entry + TP + SL as one OTOCO order
+  time_in_force: day             # brackets require day or gtc
+
+reconcile:
+  # Runs on its own thread, far faster than the scan loop, because a close
+  # request to Alpaca is a market order and not a guarantee.
+  enabled: true
+  interval_seconds: 30           # 30-60s is the sensible band
+  max_close_attempts: 5          # then halt and demand manual intervention
+  stale_order_minutes: 10        # cancel unfilled entries older than this
+  auto_protect: true             # flatten any position found without a stop
 
 screening:
   min_price: 10.0

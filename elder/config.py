@@ -67,6 +67,15 @@ class ScreeningConfig:
 
 
 @dataclass(frozen=True)
+class ReconcileConfig:
+    enabled: bool
+    interval_seconds: int
+    max_close_attempts: int
+    stale_order_minutes: int
+    auto_protect: bool
+
+
+@dataclass(frozen=True)
 class StrategyConfig:
     context: dict[str, Any]
     volume_profile: dict[str, Any]
@@ -85,6 +94,7 @@ class Config:
     execution: ExecutionConfig
     screening: ScreeningConfig
     strategy: StrategyConfig
+    reconcile: ReconcileConfig
     universe_tier: str
     raw: dict[str, Any] = field(repr=False, default_factory=dict)
 
@@ -127,6 +137,7 @@ def load(path: str | Path | None = None) -> Config:
         execution      = ExecutionConfig(**raw["execution"]),
         screening      = ScreeningConfig(**raw["screening"]),
         strategy       = StrategyConfig(**raw["strategy"]),
+        reconcile      = ReconcileConfig(**raw["reconcile"]),
         universe_tier  = raw["universe"]["active_tier"],
         raw            = raw,
     )

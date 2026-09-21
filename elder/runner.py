@@ -22,6 +22,7 @@ from . import journal, strategy, universe
 from .broker import Broker, make_trading_client
 from .data import MarketData, regular_session
 from .keys import MissingCredentials
+from .reconciler import Reconciler
 from .risk import RiskEngine
 
 log = logging.getLogger("elder")
@@ -209,6 +210,16 @@ def main(argv=None) -> int:
         log.error("cannot reach Alpaca: %s", e)
         return 1
 
+    recon = None
+    if cfg.reconcile.enabled:
+        recon = Reconciler(cfg, broker, risk,
+                           interval_seconds=cfg.reconcile.interval_seconds,
+                           max_close_attempts=cfg.reconcile.max_close_attempts,
+                           stale_order_minutes=cfg.reconcile.stale_order_minutes,
+                           auto_protect=cfg.reconcile.auto_protect,
+                           dry_run=dry_run)
+        recon.start()
+
     while not _STOP:
         try:
             if not args.ignore_clock and not broker.is_open():
@@ -225,6 +236,12 @@ def main(argv=None) -> int:
                 break
             time.sleep(1)
 
+    if recon is not None:
+        recon.stop()
+        if recon.last_report is not None:
+            r = recon.last_report
+            log.info("final reconcile: %d open | orphaned %s | stuck %s",
+                     r.open_positions, r.orphaned or "-", r.stuck_closes or "-")
     log.info("stopped.")
     return 0
 

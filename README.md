@@ -90,6 +90,24 @@ elder/
 tests/test_pipeline.py offline end-to-end check
 ```
 
+## Position reconciliation
+
+A close request to Alpaca is a market order, not a guarantee. `elder/reconciler.py`
+runs on its own thread every 30s (configurable) and treats the broker as truth:
+
+1. **Verifies requested closes actually closed.** If a close is rejected it
+   escalates — from the second attempt it cancels the symbol's open orders
+   first, because a bracket's TP/SL legs reserve the shares and cause a close
+   order to be rejected for insufficient quantity. That single step resolves
+   most stuck closes. After `max_close_attempts` it halts trading and logs
+   MANUAL INTERVENTION REQUIRED.
+2. **Detects orphaned positions** — open with no live stop order. This is the
+   worst state the bot can be in: the bracket leg was rejected or cancelled and
+   downside is unbounded. With `auto_protect: true` it flattens them.
+3. **Cancels stale unfilled entries** older than `stale_order_minutes`.
+
+Tuning is in `config.yaml` under `reconcile`. Tests: `python -m tests.test_reconciler`.
+
 ## Known limitations
 
 - **No passive liquidity.** Elder reads resting orders on Bookmap. That needs
