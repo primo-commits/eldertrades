@@ -9,4 +9,6 @@ python -m tests.test_reconciler
 echo.
 python -m tests.test_timeframes
 echo.
+python -m tests.test_backtest
+echo.
 pause

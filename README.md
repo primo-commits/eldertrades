@@ -125,6 +125,36 @@ runs on its own thread every 30s (configurable) and treats the broker as truth:
 
 Tuning is in `config.yaml` under `reconcile`. Tests: `python -m tests.test_reconciler`.
 
+## Backtesting
+
+```bash
+python -m backtest.run --synthetic                 # engine self-test, no keys
+python -m backtest.run --days 180                  # in-sample single pass
+python -m backtest.run --walk-forward --days 365   # OUT-OF-SAMPLE -- the real answer
+python -m backtest.run --sweep --days 180          # parameter grid (in-sample)
+```
+
+Or `6-BACKTEST.bat` on Windows.
+
+**Only the walk-forward number means anything.** A single pass over all data is
+in-sample: it tells you how well the parameters fit that period, not whether
+there is an edge. Walk-forward optimises on one window, evaluates on the next
+unseen one, rolls forward, and reports only out-of-sample results.
+
+What this backtester fixes versus the original (`legacy/realistic_backtester.py`):
+
+| | Original | Now |
+|---|---|---|
+| Strategy tested | an index MA crossover | **the actual Elder pipeline** |
+| Entry fill | the signal bar's own close (look-ahead) | **next bar's open** |
+| Exit fill | exactly at stop/target | **gaps fill at the open; slippage both sides** |
+| Same-bar stop + target | target could win | **stop assumed (conservative)** |
+| Costs | $0.003/share commission only | **spread + slippage + SEC + TAF** |
+| RNG | global, seeded once for a 100-combo sweep | **local, reseeded per run** |
+| Capital | 5% of initial per position, no ledger | **real cash accounting** |
+| Validation | argmax over one year | **walk-forward, disjoint test windows** |
+| "Profit factor" | avg win / avg loss (wrong) | **gross profit / gross loss** |
+
 ## Known limitations
 
 - **No passive liquidity.** Elder reads resting orders on Bookmap. That needs

@@ -7,3 +7,4 @@ __pycache__/
 .venv/
 dist_build/
 *.zip
+backtest_results/
