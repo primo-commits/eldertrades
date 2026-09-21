@@ -1,0 +1,68 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Elder Trades — single source of truth.
+#
+# Everything (bot, risk engine, backtester) reads this file. Nothing hard-codes
+# an account size or a risk limit. This is what stops the $5K / $100K / $1M
+# contradiction that ran through the original three files.
+# ─────────────────────────────────────────────────────────────────────────────
+
+account:
+  # Informational only. The risk engine reads LIVE equity from Alpaca every
+  # scan and sizes off that. Reset your Alpaca paper account to this number in
+  # the dashboard -- passing a balance on the command line does not change what
+  # the broker thinks you have.
+  nominal_equity: 1_000_000
+  paper: true
+
+risk:
+  risk_per_trade_pct:      0.0025   # 0.25% -> $2,500 on $1M
+  daily_loss_limit_pct:    0.015    # 1.5%  -> $15,000
+  trailing_dd_pct:         0.05     # 5% from peak equity (dynamic, not a fixed floor)
+  max_position_notional_pct: 0.05   # 5% of equity -> $50,000
+  max_concurrent_positions: 10
+  max_gross_exposure_pct:  1.50     # 150% of equity
+  max_risk_per_bucket_mult: 2.0     # a correlation bucket may hold 2x base risk
+  min_reward_risk:         1.5      # reject setups below 1.5R
+  # Liquidity caps -- you have to be able to get out.
+  max_pct_of_adv:          0.01     # <= 1% of 20-day average daily volume
+  max_pct_of_bar_volume:   0.10     # <= 10% of typical 5-minute volume
+
+data:
+  # "iex" is free but sees ~2% of consolidated volume, which makes VWAP and any
+  # volume-based signal close to noise. "sip" (Algo Trader Plus, $99/mo) is
+  # required for the order-flow layer to mean anything.
+  feed: iex
+  timeframes: ["5Min", "15Min", "1Hour"]
+  bias_timeframe: "4Hour"        # resampled from 1Hour, anchored to the RTH open
+  lookback_days: 45
+  session_tz: "America/New_York"
+  rth_open:  "09:30"
+  rth_close: "16:00"
+  skip_first_minutes: 5          # no entries in the opening auction chaos
+  skip_last_minutes:  5
+
+orderflow:
+  # Honest proxy for Elder's footprint/DOM work. NOT true depth of book -- see
+  # docs/orderflow.md. Requires feed: sip to be worth anything.
+  enabled: true
+  classify: quote_rule           # quote_rule (Lee-Ready) | tick_rule
+  delta_window_minutes: 30
+  price_bin_ticks: 1
+
+execution:
+  dry_run: true                  # SAFE BY DEFAULT -- --live is required to trade
+  scan_interval_minutes: 5
+  order_type: bracket            # equities only; crypto has no bracket support
+  time_in_force: day
+
+screening:
+  min_price: 10.0
+  min_adv_notional: 50_000_000
+  full_size_adv_notional: 200_000_000
+  max_spread_bps: 5
+  min_atr_pct: 0.01
+  max_atr_pct: 0.06
+  skip_earnings_window_days: 1
+
+universe:
+  active_tier: starter           # starter | etf_core | equity_large | crypto
