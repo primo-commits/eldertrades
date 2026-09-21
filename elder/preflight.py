@@ -73,9 +73,14 @@ def run(tier: str | None = None, do_scan: bool = False,
     # ── 3. credentials ──────────────────────────────────────────────────────
     c.section("3. Credentials")
     try:
-        from .keys import load_keys
-        key, _secret = load_keys()
-        c.ok(f"API key found (…{key[-4:]})")
+        from .keys import describe_source, load_keys
+        key, _secret = load_keys(prefer=cfg.prefer_credentials)
+        src = describe_source(prefer=cfg.prefer_credentials)
+        c.ok(f"API key found (…{key[-4:]}) from {src['winner']}")
+        if src["conflict"]:
+            c.warn(f"a key exists in BOTH places. Using {src['winner']}, "
+                   f"ignoring {src['ignored']}. Clear the stale one to avoid "
+                   f"connecting to the wrong account -- run 'python -m elder.account'.")
     except Exception as e:
         c.fail(str(e).split("\n")[0])
         print("\n".join("        " + ln for ln in str(e).split("\n")[1:]))
@@ -179,7 +184,8 @@ def run(tier: str | None = None, do_scan: bool = False,
     frames_by_symbol = {}
     try:
         from .data import MarketData, regular_session, session_anchored
-        md = MarketData(feed=cfg.data.feed, session_tz=cfg.data.session_tz)
+        md = MarketData(feed=cfg.data.feed, session_tz=cfg.data.session_tz,
+                        prefer=cfg.prefer_credentials)
         end = dt.datetime.now(dt.timezone.utc)
         start = end - dt.timedelta(days=cfg.data.lookback_days)
 

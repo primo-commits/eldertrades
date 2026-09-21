@@ -20,7 +20,7 @@ def main() -> int:
 
     cfg = cfgmod.load()
     try:
-        key, _ = load_keys()
+        key, _ = load_keys(prefer=cfg.prefer_credentials)
     except MissingCredentials as e:
         print(e)
         return 1
@@ -38,16 +38,21 @@ def main() -> int:
     print("=" * 62)
     print("  WHICH ALPACA ACCOUNT ARE THESE KEYS USING?")
     print("=" * 62)
-    src = describe_source()
+    src = describe_source(prefer=cfg.prefer_credentials)
     print(f"  API key ending ....... ...{key[-6:]}")
     print(f"  Key came from ........ {src['winner']}")
     print(f"  Endpoint ............. {'PAPER' if cfg.paper else 'LIVE'}")
-    if src["shadowed"]:
+    if src["conflict"]:
         print()
-        print( "  !! An environment variable is OVERRIDING alpaca_keys.txt.")
+        print( "  !! CONFLICT: a key exists in BOTH the file and the environment.")
+        print(f"     Using:   {src['winner']}")
+        print(f"     Ignoring: {src['ignored']}")
         print(f"     Env vars set: {', '.join(src['env_vars_set'])}")
-        print(f"     The file {src['file_path']} is being IGNORED.")
-        print( "     Clear the env var, or put the right key in it.")
+        print( "     Preference is set by credentials.prefer in config.yaml.")
+        print( "     Clearing the stale environment variable is the clean fix:")
+        print( "       Windows:  setx ALPACA_API_KEY \"\"")
+        print( "                 setx ALPACA_SECRET_KEY \"\"")
+        print( "                 ...then open a NEW terminal window.")
     print()
     print(f"  ACCOUNT NUMBER ....... {a.account_number}")
     print(f"  Account id ........... {a.id}")

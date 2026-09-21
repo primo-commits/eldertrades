@@ -6,6 +6,17 @@
 # contradiction that ran through the original three files.
 # ─────────────────────────────────────────────────────────────────────────────
 
+credentials:
+  # Which source wins when BOTH alpaca_keys.txt and environment variables hold
+  # a key: "file" (default) or "env".
+  #
+  # Default is "file" deliberately. Setup instructions tell you to edit
+  # alpaca_keys.txt, so that file is the explicit, visible intent. A leftover
+  # environment variable from an older setup silently pointing the bot at a
+  # different account is a trap -- and one that has already bitten. Whichever
+  # you choose, a conflict is reported loudly rather than resolved in silence.
+  prefer: file
+
 account:
   # Informational only. The risk engine reads LIVE equity from Alpaca every
   # scan and sizes off that. Reset your Alpaca paper account to this number in

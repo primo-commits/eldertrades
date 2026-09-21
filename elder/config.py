@@ -88,6 +88,7 @@ class StrategyConfig:
 class Config:
     nominal_equity: float
     paper: bool
+    prefer_credentials: str
     risk: RiskConfig
     data: DataConfig
     orderflow: OrderFlowConfig
@@ -131,6 +132,7 @@ def load(path: str | Path | None = None) -> Config:
     return Config(
         nominal_equity = float(raw["account"]["nominal_equity"]),
         paper          = bool(raw["account"].get("paper", True)),
+        prefer_credentials = str(raw.get("credentials", {}).get("prefer", "file")),
         risk           = RiskConfig(**raw["risk"]),
         data           = DataConfig(**raw["data"]),
         orderflow      = OrderFlowConfig(**raw["orderflow"]),

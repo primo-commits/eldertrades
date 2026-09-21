@@ -37,7 +37,8 @@ def _read_keyfile(path: Path) -> dict[str, str]:
     return out
 
 
-def describe_source(keyfile: str | os.PathLike | None = None) -> dict:
+def describe_source(keyfile: str | os.PathLike | None = None,
+                    prefer: str = "file") -> dict:
     """
     Where would credentials come from right now? Environment variables take
     precedence over the key file, so a stale env var left over from an earlier
@@ -48,27 +49,50 @@ def describe_source(keyfile: str | os.PathLike | None = None) -> dict:
     file_vals = _read_keyfile(path)
     env_hits = [n for n in _KEY_NAMES if os.environ.get(n)]
     file_hits = [n for n in _KEY_NAMES if file_vals.get(n)]
+    if prefer == "env":
+        winner = ("environment variable " + env_hits[0]) if env_hits else (
+            f"file {path.name}" if file_hits else "nothing found")
+        loser = f"file {path.name}" if (env_hits and file_hits) else None
+    else:
+        winner = (f"file {path.name}") if file_hits else (
+            ("environment variable " + env_hits[0]) if env_hits else "nothing found")
+        loser = f"environment variable {env_hits[0]}" if (env_hits and file_hits) else None
+
     return {
         "env_vars_set": env_hits,
         "file_path": str(path),
         "file_exists": path.is_file(),
         "file_keys": file_hits,
-        "winner": ("environment variable " + env_hits[0]) if env_hits
-                  else (f"file {path.name}" if file_hits else "nothing found"),
-        "shadowed": bool(env_hits and file_hits),
+        "prefer": prefer,
+        "winner": winner,
+        "ignored": loser,
+        "conflict": bool(env_hits and file_hits),
     }
 
 
-def load_keys(keyfile: str | os.PathLike | None = None) -> tuple[str, str]:
+def load_keys(keyfile: str | os.PathLike | None = None,
+              prefer: str = "file") -> tuple[str, str]:
     """
-    Resolve (api_key, api_secret). Environment wins over the key file.
+    Resolve (api_key, api_secret).
+
+    `prefer` decides which source wins when both hold a key: "file" (default)
+    or "env". The file wins by default because the setup instructions tell the
+    user to edit alpaca_keys.txt -- a stale environment variable quietly
+    overriding it points the bot at a different account with no visible sign.
 
     Raises MissingCredentials with an actionable message if nothing is found.
     """
-    search = dict(os.environ)
     path = Path(keyfile) if keyfile else Path(__file__).resolve().parent.parent / "alpaca_keys.txt"
-    for k, v in _read_keyfile(path).items():
-        search.setdefault(k, v)
+    file_vals = _read_keyfile(path)
+
+    if prefer == "env":
+        search = dict(os.environ)
+        for k, v in file_vals.items():
+            search.setdefault(k, v)
+    else:
+        search = dict(file_vals)
+        for k, v in os.environ.items():
+            search.setdefault(k, v)
 
     key    = next((search[n] for n in _KEY_NAMES    if search.get(n)), None)
     secret = next((search[n] for n in _SECRET_NAMES if search.get(n)), None)
@@ -97,9 +121,10 @@ def load_keys(keyfile: str | os.PathLike | None = None) -> tuple[str, str]:
     return key, secret
 
 
-def has_keys(keyfile: str | os.PathLike | None = None) -> bool:
+def has_keys(keyfile: str | os.PathLike | None = None,
+             prefer: str = "file") -> bool:
     try:
-        load_keys(keyfile)
+        load_keys(keyfile, prefer=prefer)
         return True
     except MissingCredentials:
         return False

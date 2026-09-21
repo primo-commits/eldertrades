@@ -69,8 +69,8 @@ class MarketData:
     """Thin wrapper over the two Alpaca data clients."""
 
     def __init__(self, feed: str = "iex", session_tz: str = "America/New_York",
-                 keyfile: str | None = None):
-        key, secret = load_keys(keyfile)
+                 keyfile: str | None = None, prefer: str = "file"):
+        key, secret = load_keys(keyfile, prefer=prefer)
         self.stock = StockHistoricalDataClient(key, secret)
         self.crypto = CryptoHistoricalDataClient(key, secret)
         self.feed = DataFeed(feed.lower())

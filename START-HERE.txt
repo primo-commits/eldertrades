@@ -149,6 +149,23 @@ Everything is in this folder. Do these in order.
 
   ================  IF SOMETHING BREAKS  ================
 
+  Bot connects to the WRONG Alpaca account
+      You probably have a leftover ALPACA_API_KEY environment
+      variable from an older setup. It points at a different
+      account and used to override alpaca_keys.txt silently.
+
+      The file now wins by default, so just re-running should
+      fix it. To clear the stale variable properly:
+
+        setx ALPACA_API_KEY ""
+        setx ALPACA_SECRET_KEY ""
+
+      ...then CLOSE the window and open a NEW one. setx only
+      affects new terminals.
+
+      Run 5-ACCOUNT.bat to confirm which account you are on.
+
+
   "python is not recognized"
       Python is not installed or not on your PATH.
       Get it from python.org and tick "Add Python to PATH".

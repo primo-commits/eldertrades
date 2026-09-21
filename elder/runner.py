@@ -190,7 +190,8 @@ def main(argv=None) -> int:
     log.info("=" * 68)
 
     try:
-        md = MarketData(feed=cfg.data.feed, session_tz=cfg.data.session_tz)
+        md = MarketData(feed=cfg.data.feed, session_tz=cfg.data.session_tz,
+                        prefer=cfg.prefer_credentials)
         client = make_trading_client(cfg)
         broker = Broker(cfg, client)
         risk = RiskEngine(cfg, client)

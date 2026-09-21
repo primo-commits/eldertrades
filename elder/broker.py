@@ -120,5 +120,5 @@ class Broker:
 
 def make_trading_client(cfg, keyfile: str | None = None) -> TradingClient:
     from .keys import load_keys
-    key, secret = load_keys(keyfile)
+    key, secret = load_keys(keyfile, prefer=getattr(cfg, "prefer_credentials", "file"))
     return TradingClient(key, secret, paper=cfg.paper)
