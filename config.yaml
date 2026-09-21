@@ -43,9 +43,15 @@ data:
   # volume-based signal close to noise. "sip" (Algo Trader Plus, $99/mo) is
   # required for the order-flow layer to mean anything.
   feed: iex
+  # Only this timeframe is fetched from Alpaca. Every higher timeframe is
+  # derived from it by session-anchored resampling, so they all share the same
+  # RTH filtering and 09:30 anchor. See runner.fetch_all for why.
+  base_timeframe: "5Min"
   timeframes: ["5Min", "15Min", "1Hour"]
   bias_timeframe: "4Hour"        # resampled from 1Hour, anchored to the RTH open
-  lookback_days: 45
+  # 60 days gives ~41 trading days, so ~82 session-anchored 4H bars --
+  # enough confirmed swings for the structure read to resolve.
+  lookback_days: 60
   session_tz: "America/New_York"
   rth_open:  "09:30"
   rth_close: "16:00"

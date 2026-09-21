@@ -29,6 +29,7 @@ class RiskConfig:
 @dataclass(frozen=True)
 class DataConfig:
     feed: str
+    base_timeframe: str
     timeframes: list[str]
     bias_timeframe: str
     lookback_days: int

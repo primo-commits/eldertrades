@@ -7,4 +7,6 @@ python -m tests.test_pipeline
 echo.
 python -m tests.test_reconciler
 echo.
+python -m tests.test_timeframes
+echo.
 pause

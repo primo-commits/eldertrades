@@ -101,7 +101,10 @@ elder/
   broker.py            Alpaca orders
   journal.py           CSV journaling
   runner.py            scan loop / CLI
-tests/test_pipeline.py offline end-to-end check
+tests/
+  test_pipeline.py     offline end-to-end check
+  test_reconciler.py   close verification and orphan detection
+  test_timeframes.py   session-anchoring and zone proximity regressions
 ```
 
 ## Position reconciliation

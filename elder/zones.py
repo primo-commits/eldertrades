@@ -182,19 +182,31 @@ def tag_lvn_confluence(zones: list[Zone], lvn_levels: list[float]) -> list[Zone]
 
 def select_zone(zones: list[Zone], price: float, direction: int, *,
                 max_distance_pct: float = 0.01,
+                max_distance_by_tf: dict[str, float] | None = None,
                 prefer_higher_timeframe: bool = True,
                 timeframe_rank: dict[str, int] | None = None) -> Zone | None:
     """
     Pick the zone to engage: right side of the market, near enough to price.
+
+    `max_distance_by_tf` gives each zone a proximity budget scaled to the ATR of
+    the timeframe it was drawn on. A single global tolerance is a units
+    mismatch: a 4-hour zone is a wider structure than a 15-minute one, and
+    judging it against the 5-minute ATR makes every higher-timeframe zone look
+    absurdly far away.
 
     Ties break toward the higher timeframe (a 4H zone beats a conflicting 15m
     zone), then toward strength.
     """
     want = DEMAND if direction > 0 else SUPPLY
     rank = timeframe_rank or {"4Hour": 4, "1Hour": 3, "30Min": 2, "15Min": 1}
+    limits = max_distance_by_tf or {}
+
+    def _limit(z: Zone) -> float:
+        return limits.get(z.timeframe, max_distance_pct)
+
     cands = [z for z in zones
              if z.kind == want and not z.mitigated
-             and z.distance_pct(price) <= max_distance_pct]
+             and z.distance_pct(price) <= _limit(z)]
     if not cands:
         return None
     return max(cands, key=lambda z: (

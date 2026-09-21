@@ -138,20 +138,36 @@ def evaluate(symbol: str, *, bars_by_tf: dict[str, pd.DataFrame],
     cur_atr = float(atr(exec_bars, 14).iloc[-1])
     if not (cur_atr > 0):
         return None, [Rejection(symbol, "location", "ATR unavailable for proximity test")]
-    # Proximity in ATR, not a fixed percent: the confirmation flip bar has
-    # already carried price ~1 ATR away from the zone by the time we act.
-    max_dist = (cur_atr * s.zones["max_distance_atr"]) / price
+
+    # Proximity budget per zone timeframe. A 4H zone gets a 4H-sized tolerance;
+    # scoring it against the 5-minute ATR made every higher-timeframe zone read
+    # as tens of percent away.
+    mult = s.zones["max_distance_atr"]
+    max_dist_by_tf: dict[str, float] = {}
+    for tf, b in bars_by_tf.items():
+        if b is None or len(b) < 15:
+            continue
+        a = float(atr(b, 14).iloc[-1])
+        if a > 0:
+            max_dist_by_tf[tf] = (a * mult) / price
+    max_dist = (cur_atr * mult) / price
+
     zone = zn.select_zone(
         all_zones, price, direction,
         max_distance_pct=max_dist,
+        max_distance_by_tf=max_dist_by_tf,
         prefer_higher_timeframe=s.zones["timeframe_priority_high_wins"],
     )
     if zone is None:
         near = [z for z in all_zones
                 if z.kind == (zn.DEMAND if direction > 0 else zn.SUPPLY) and not z.mitigated]
-        closest = min((z.distance_pct(price) for z in near), default=None)
-        detail = (f"closest is {closest:.2%} away, limit {max_dist:.2%}"
-                  if closest is not None else "no zones on the required side")
+        if near:
+            z0 = min(near, key=lambda z: z.distance_pct(price))
+            lim = max_dist_by_tf.get(z0.timeframe, max_dist)
+            detail = (f"closest is {z0.distance_pct(price):.2%} away on {z0.timeframe}, "
+                      f"limit {lim:.2%}")
+        else:
+            detail = "no zones on the required side"
         return None, [Rejection(symbol, "location",
                                 f"price {price:.2f} not at a "
                                 f"{'demand' if direction > 0 else 'supply'} zone ({detail})")]

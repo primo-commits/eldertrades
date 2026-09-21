@@ -20,7 +20,7 @@ import pandas as pd
 from . import config as cfgmod
 from . import journal, strategy, universe
 from .broker import Broker, make_trading_client
-from .data import MarketData, regular_session
+from .data import MarketData, pandas_rule, regular_session, session_anchored
 from .keys import MissingCredentials
 from .reconciler import Reconciler
 from .risk import RiskEngine
@@ -48,40 +48,71 @@ def _handle_sigint(signum, frame):
 
 
 def fetch_all(md: MarketData, symbols: list[str], cfg) -> dict[str, dict[str, pd.DataFrame]]:
-    """Fetch every timeframe for every symbol; one paginated request per timeframe."""
+    """
+    Fetch ONE base timeframe and derive the rest by session-anchored resampling.
+
+    The previous version requested each timeframe natively from Alpaca and then
+    passed all of them through regular_session(). That is correct for intraday
+    bars and WRONG for anything an hour or longer: a time-of-day filter keeps a
+    bar only if its START falls inside 09:35-15:55 ET. Alpaca's 4-hour bars are
+    aligned to the UTC grid, which in ET is 00/04/08/12/16/20 -- so exactly ONE
+    per day survived, always the 12:00 bar.
+
+    Measured on a 45-day window: 253 native 4H bars became 30, one per day,
+    yielding 2 swing highs and 1 swing low. Classifying a trend needs 3 rising
+    highs and 2 rising lows, so the 4H bias could almost never resolve to
+    anything but "unclear" -- which is exactly what the first live session
+    showed on 14 of 20 symbols.
+
+    Deriving everything from RTH-filtered 5-min bars fixes it, guarantees the
+    timeframes are mutually consistent, keeps every bar anchored to the 09:30
+    session open, and costs one API request per scan instead of five.
+    """
     end = dt.datetime.now(dt.timezone.utc)
     start = end - dt.timedelta(days=cfg.data.lookback_days)
-    wanted = sorted({*cfg.data.timeframes,
-                     cfg.strategy.volume_profile["timeframe"],
-                     *cfg.strategy.zones["timeframes"]},
-                    key=lambda s: s)
 
-    out: dict[str, dict[str, pd.DataFrame]] = {s: {} for s in symbols}
-    for tf in wanted:
-        try:
-            got = md.bars(symbols, tf, start=start, end=end)
-        except Exception as e:
-            log.error("bar fetch failed for %s: %s", tf, e)
+    base = cfg.data.base_timeframe
+    higher = sorted(
+        {*cfg.data.timeframes,
+         cfg.strategy.volume_profile["timeframe"],
+         cfg.strategy.context["structure_timeframe"],
+         *cfg.strategy.zones["timeframes"]} - {base},
+        key=_tf_minutes_key,
+    )
+
+    try:
+        raw = md.bars(symbols, base, start=start, end=end)
+    except Exception as e:
+        log.error("bar fetch failed for %s: %s", base, e)
+        return {s: {} for s in symbols}
+
+    out: dict[str, dict[str, pd.DataFrame]] = {}
+    for sym in symbols:
+        df = raw.get(sym)
+        if df is None or df.empty:
+            out[sym] = {}
             continue
-        for sym, df in got.items():
-            if df.empty:
-                continue
-            out[sym][tf] = regular_session(
-                df, tz=cfg.data.session_tz,
-                open_time=cfg.data.rth_open, close_time=cfg.data.rth_close,
-                skip_first_minutes=cfg.data.skip_first_minutes,
-                skip_last_minutes=cfg.data.skip_last_minutes)
-
-    # The 4H bias chart is resampled from 1H, anchored to the RTH open.
-    bias_tf = cfg.strategy.context["structure_timeframe"]
-    if bias_tf not in wanted:
-        from .data import session_anchored
-        for sym, frames in out.items():
-            if "1Hour" in frames and not frames["1Hour"].empty:
-                frames[bias_tf] = session_anchored(frames["1Hour"], "4h",
-                                                   tz=cfg.data.session_tz,
-                                                   open_time=cfg.data.rth_open)
+        rth = regular_session(
+            df, tz=cfg.data.session_tz,
+            open_time=cfg.data.rth_open, close_time=cfg.data.rth_close,
+            skip_first_minutes=cfg.data.skip_first_minutes,
+            skip_last_minutes=cfg.data.skip_last_minutes)
+        if rth.empty:
+            out[sym] = {}
+            continue
+        frames = {base: rth}
+        for tf in higher:
+            frames[tf] = session_anchored(rth, pandas_rule(tf),
+                                          tz=cfg.data.session_tz,
+                                          open_time=cfg.data.rth_open)
+        out[sym] = frames
     return out
+
+
+def _tf_minutes_key(spec: str) -> int:
+    digits = int("".join(c for c in spec if c.isdigit()) or 1)
+    unit = "".join(c for c in spec if c.isalpha()).lower()
+    return digits if unit.startswith("min") else digits * 60 if unit.startswith("h") else digits * 1440
 
 
 def scan_once(md, broker, risk, cfg, symbols, *, dry_run: bool) -> dict:
