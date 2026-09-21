@@ -51,6 +51,16 @@ def load_keys(keyfile: str | os.PathLike | None = None) -> tuple[str, str]:
     key    = next((search[n] for n in _KEY_NAMES    if search.get(n)), None)
     secret = next((search[n] for n in _SECRET_NAMES if search.get(n)), None)
 
+    placeholder_markers = ("your_key", "your_secret", "paste", "xxxx", "PKxxxx")
+    if key and any(m.lower() in key.lower() for m in placeholder_markers):
+        raise MissingCredentials(
+            "alpaca_keys.txt still contains the placeholder text.\n\n"
+            "  Open alpaca_keys.txt in Notepad and replace the example values\n"
+            "  with your real Alpaca PAPER key and secret, then save.\n"
+            "  Get them at https://app.alpaca.markets/paper/dashboard/overview\n"
+            "  (Home -> API Keys -> Generate)"
+        )
+
     if not key or not secret:
         raise MissingCredentials(
             "No Alpaca API credentials found.\n"
