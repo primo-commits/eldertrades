@@ -113,8 +113,10 @@ def evaluate(symbol: str, *, bars_by_tf: dict[str, pd.DataFrame],
     position = profile.position_of(price)
 
     # Elder does not fade his own context: if the POC trend disagrees with the
-    # structural bias, stand down rather than guess.
-    if trend != "neutral" and ((trend == "bullish") != (direction > 0)):
+    # structural bias, stand down rather than guess. Configurable -- see
+    # context.require_poc_alignment.
+    poc_conflict = trend != "neutral" and ((trend == "bullish") != (direction > 0))
+    if poc_conflict and s.context.get("require_poc_alignment", True):
         return None, [Rejection(symbol, "context",
                                 f"POC trend {trend} conflicts with structure {read.regime}")]
 
@@ -130,6 +132,7 @@ def evaluate(symbol: str, *, bars_by_tf: dict[str, pd.DataFrame],
             consolidation_max_bars=s.zones["consolidation_max_bars"],
             consolidation_atr_mult=s.zones["consolidation_atr_mult"],
             max_touches=s.zones["max_touches"],
+            max_age_bars=s.zones["max_age_bars"],
         )
     if not all_zones:
         return None, [Rejection(symbol, "location", "no valid zones on any timeframe")]
@@ -165,7 +168,7 @@ def evaluate(symbol: str, *, bars_by_tf: dict[str, pd.DataFrame],
             z0 = min(near, key=lambda z: z.distance_pct(price))
             lim = max_dist_by_tf.get(z0.timeframe, max_dist)
             detail = (f"closest is {z0.distance_pct(price):.2%} away on {z0.timeframe}, "
-                      f"limit {lim:.2%}")
+                      f"limit {lim:.2%} ({z0.age_bars} bars old)")
         else:
             detail = "no zones on the required side"
         return None, [Rejection(symbol, "location",
@@ -221,6 +224,9 @@ def evaluate(symbol: str, *, bars_by_tf: dict[str, pd.DataFrame],
         setup.notes.append("zone sits on a low-volume node -- expect a fast reaction")
     if position == "in_value":
         setup.notes.append("price inside value area: rotational, lower conviction")
+    if poc_conflict:
+        setup.notes.append(f"POC trend {trend} disagrees with structure {read.regime} "
+                           f"-- reduced conviction (require_poc_alignment is off)")
     return setup, rejects
 
 

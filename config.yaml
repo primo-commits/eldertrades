@@ -104,6 +104,13 @@ strategy:
     # 3 equal highs + 3 equal lows; anything else -> no predetermined bias.
     bullish_higher_lows: 2
     bullish_higher_highs: 3
+    # Stand down when the session-over-session POC trend disagrees with the
+    # structural bias. This is an inference from Elder combining structure and
+    # volume profile for context, not a rule he states outright -- so it is a
+    # knob. In the first live session it blocked 2 of the 5 symbols that
+    # resolved a bias at all. Set false to treat a conflict as lower
+    # conviction rather than a veto.
+    require_poc_alignment: true
 
   volume_profile:
     timeframe: "30Min"
@@ -126,6 +133,11 @@ strategy:
     # Must allow for the flip bar having already moved ~1 ATR off the zone.
     max_distance_atr: 2.0
     max_touches: 3                 # a zone touched more than this is considered used up
+    # Zones expire, counted in bars of their OWN timeframe. Without this a
+    # level drawn weeks ago survives forever if price never closed through it:
+    # the first live session surfaced a 15-minute META zone 23.5% below price.
+    # 200 bars is ~8 sessions on 15Min, ~15 on 30Min, ~29 on 1Hour.
+    max_age_bars: 200
 
   confirmation:
     # "bars" works on the free IEX feed using bar volume as a proxy for

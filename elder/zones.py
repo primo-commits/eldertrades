@@ -42,6 +42,8 @@ class Zone:
     touches: int = 0
     mitigated: bool = False
     lvn_confluence: bool = False
+    age_bars: int = 0          # bars of its own timeframe since the impulse
+    stale: bool = False
 
     @property
     def height(self) -> float:
@@ -73,13 +75,19 @@ class Zone:
         s += max(0.0, 0.15 - 0.05 * self.touches)
         return round(min(1.0, s), 3)
 
+    @property
+    def label(self) -> str:
+        return (f"{self.kind} {self.bottom:.2f}-{self.top:.2f} on {self.timeframe} "
+                f"({self.age_bars} bars old, {self.touches} touch(es))")
+
 
 def find_zones(bars: pd.DataFrame, *, timeframe: str = "1Hour",
                expansion_atr_mult: float = 2.0,
                consolidation_max_bars: int = 10,
                consolidation_atr_mult: float = 0.75,
                atr_period: int = 14,
-               max_touches: int = 3) -> list[Zone]:
+               max_touches: int = 3,
+               max_age_bars: int = 200) -> list[Zone]:
     """
     Locate consolidation-before-expansion zones.
 
@@ -88,7 +96,14 @@ def find_zones(bars: pd.DataFrame, *, timeframe: str = "1Hour",
     2. Walk backwards to collect the tight bars preceding it (each with a range
        under `consolidation_atr_mult` x ATR) -- the balance.
     3. Zone = that consolidation's high/low.
-    4. Count later touches and mark mitigation.
+    4. Count later touches, mark mitigation, and expire stale zones.
+
+    Zones expire. Without an age limit a level drawn weeks ago survives forever
+    as long as price never closed through its far side -- the first live session
+    produced a 15-minute META demand zone 23.5% below price, which is not a
+    level anyone would trade. `max_age_bars` is counted in bars of the zone's
+    own timeframe, so a 15-minute zone ages out in days while a 4-hour zone
+    stays relevant for weeks.
     """
     if bars is None or len(bars) < atr_period + consolidation_max_bars + 2:
         return []
@@ -131,7 +146,9 @@ def find_zones(bars: pd.DataFrame, *, timeframe: str = "1Hour",
 
         z = Zone(kind=kind, top=seg_h, bottom=seg_l,
                  formed_at=idx[start], impulse_at=idx[i],
-                 timeframe=timeframe, impulse_atr_mult=round(float(mult), 2))
+                 timeframe=timeframe, impulse_atr_mult=round(float(mult), 2),
+                 age_bars=n - 1 - i)
+        z.stale = z.age_bars > max_age_bars
 
         # How has price treated it since?
         after = bars.iloc[i + 1:]
@@ -150,8 +167,9 @@ def find_zones(bars: pd.DataFrame, *, timeframe: str = "1Hour",
 
 
 def _dedupe(zones: list[Zone], max_touches: int) -> list[Zone]:
-    """Merge heavily overlapping same-kind zones; drop worn-out ones."""
-    live = [z for z in zones if not z.mitigated and z.touches <= max_touches]
+    """Merge heavily overlapping same-kind zones; drop worn-out and stale ones."""
+    live = [z for z in zones
+            if not z.mitigated and not z.stale and z.touches <= max_touches]
     live.sort(key=lambda z: (z.kind, z.bottom))
     out: list[Zone] = []
     for z in live:
