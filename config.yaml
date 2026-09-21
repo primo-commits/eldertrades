@@ -95,9 +95,17 @@ strategy:
     consolidation_atr_mult: 0.75   # bars tighter than this x ATR count as balance
     timeframes: ["4Hour", "1Hour", "30Min", "15Min"]
     timeframe_priority_high_wins: true   # 4H zone beats a conflicting 15m zone
+    # How close price must be to a zone edge to engage, in ATR rather than a
+    # fixed percent -- a 1% band means something different on SPY than on TSLA.
+    # Must allow for the flip bar having already moved ~1 ATR off the zone.
+    max_distance_atr: 2.0
     max_touches: 3                 # a zone touched more than this is considered used up
 
   confirmation:
+    # "bars" works on the free IEX feed using bar volume as a proxy for
+    # aggressive participation. "orderflow" needs feed: sip and uses classified
+    # trade delta -- much closer to what Elder reads on Bookmap.
+    mode: bars
     exhaustion_bars: 3             # 3 consecutive pushes into the zone...
     exhaustion_require_declining_volume: true   # ...each on lower volume = exhaustion
     flip_atr_mult: 1.0             # "step up and take control": > 1 ATR move...
@@ -106,7 +114,14 @@ strategy:
   exits:
     stop_basis: invalidation       # primary: beyond the swing that invalidates the thesis
     stop_atr_buffer: 0.25          # small ATR cushion beyond that swing
-    stop_atr_max_mult: 1.5         # cap: never risk more than 1.5x ATR per unit
+    # Cap on stop width. NOTE the interaction with confirmation.flip_atr_mult:
+    # entry is the close of a >= 1.0x ATR flip bar and the stop sits below that
+    # bar's low, so structural minimum risk is roughly
+    #   flip (1.0) + exhaustion push range (~0.5) + buffer (0.25) = 1.75x ATR.
+    # The originally supplied 1.5x sat below that floor and rejected virtually
+    # every confirmed setup. 2.5x leaves working headroom while still refusing
+    # genuinely wide setups. Lower flip_atr_mult if you want a tighter cap.
+    stop_atr_max_mult: 2.5
     target_basis: poc              # POC magnet first, then HVN, then opposing VA edge
     min_reward_risk: 1.5
 
