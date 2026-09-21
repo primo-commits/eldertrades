@@ -37,6 +37,28 @@ def _read_keyfile(path: Path) -> dict[str, str]:
     return out
 
 
+def describe_source(keyfile: str | os.PathLike | None = None) -> dict:
+    """
+    Where would credentials come from right now? Environment variables take
+    precedence over the key file, so a stale env var left over from an earlier
+    setup will silently override alpaca_keys.txt and point the bot at a
+    different account. This reports the winner and any shadowed sources.
+    """
+    path = Path(keyfile) if keyfile else Path(__file__).resolve().parent.parent / "alpaca_keys.txt"
+    file_vals = _read_keyfile(path)
+    env_hits = [n for n in _KEY_NAMES if os.environ.get(n)]
+    file_hits = [n for n in _KEY_NAMES if file_vals.get(n)]
+    return {
+        "env_vars_set": env_hits,
+        "file_path": str(path),
+        "file_exists": path.is_file(),
+        "file_keys": file_hits,
+        "winner": ("environment variable " + env_hits[0]) if env_hits
+                  else (f"file {path.name}" if file_hits else "nothing found"),
+        "shadowed": bool(env_hits and file_hits),
+    }
+
+
 def load_keys(keyfile: str | os.PathLike | None = None) -> tuple[str, str]:
     """
     Resolve (api_key, api_secret). Environment wins over the key file.

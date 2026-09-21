@@ -16,7 +16,7 @@ import sys
 def main() -> int:
     from . import config as cfgmod
     from .broker import make_trading_client
-    from .keys import MissingCredentials, load_keys
+    from .keys import MissingCredentials, describe_source, load_keys
 
     cfg = cfgmod.load()
     try:
@@ -38,8 +38,16 @@ def main() -> int:
     print("=" * 62)
     print("  WHICH ALPACA ACCOUNT ARE THESE KEYS USING?")
     print("=" * 62)
+    src = describe_source()
     print(f"  API key ending ....... ...{key[-6:]}")
+    print(f"  Key came from ........ {src['winner']}")
     print(f"  Endpoint ............. {'PAPER' if cfg.paper else 'LIVE'}")
+    if src["shadowed"]:
+        print()
+        print( "  !! An environment variable is OVERRIDING alpaca_keys.txt.")
+        print(f"     Env vars set: {', '.join(src['env_vars_set'])}")
+        print(f"     The file {src['file_path']} is being IGNORED.")
+        print( "     Clear the env var, or put the right key in it.")
     print()
     print(f"  ACCOUNT NUMBER ....... {a.account_number}")
     print(f"  Account id ........... {a.id}")
