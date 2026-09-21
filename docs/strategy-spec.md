@@ -1,82 +1,217 @@
-# Strategy spec — 4-Hour Power of Three (PO3) / AMD
+# Strategy spec — Elder Santis, "One and Done" model
 
-> **Status: DRAFT — awaiting transcripts.** Recorded from the user's brief on
-> 2026-09-21. Nothing here is implemented yet. Rules marked **[AMBIGUOUS]**
-> need a precise definition before they can be coded.
+Source: *My Entire Day Trading Strategy Explained In 30mins* (full transcript in
+`docs/transcript-one-and-done.txt`). Instrument in the video: **ES futures**.
 
-## Correction to earlier research
+> **Supersedes the PO3/TTrades draft.** That was a wrong lead. This transcript
+> matches the original research: supply/demand + volume profile + order flow.
 
-The strategy is **not** Elder Santis's (@tradingelder) order-flow method. It is
-the **4-Hour Power of Three** model associated with **TTrades**, derived from
-ICT / Smart Money Concepts. Earlier research in this repo targeted the wrong
-trader. Consequence: the order-flow layer (`elder/orderflow.py`) is **no longer
-required** — PO3 is derivable from OHLC plus time alone.
+## The three pillars
 
-## Core cycle: AMD
+> "For any good setup, you need three things. You need context, you need
+> location, and then you need confirmation."
 
-A 4H candle is treated as a miniature daily chart:
+Nothing fires unless all three line up. He is explicit that any one alone is a
+losing trade: *"Don't just be looking at book map and being like, oh, big bubble,
+I'm shorting."*
 
-| Phase | Behaviour |
+---
+
+## 1. CONTEXT — where is the market going?
+
+### 1a. Market structure (4H timeframe)
+
+Classified from swing sequence:
+
+| Regime | Definition (his words) |
 |---|---|
-| **Accumulation** | Candle opens, price ranges tightly |
-| **Manipulation** | Price pushes the *wrong* way, sweeping liquidity and trapping traders. This is the wick. **Do not trade into it.** |
-| **Distribution** | Price reverses and expands in the true direction, forming the body |
+| **Bullish** | "two higher lows and three higher highs" |
+| **Bearish** | "two lower highs and then three new lows" |
+| **Balanced** | "three equal highs and three equal lows" |
+| **Unclear** | No clean structure → **no predetermined bias**; react after the open |
 
-"Fading the 4-hour" = refusing the manipulation push, waiting for it to fail.
+Rationale given: *"any timeframe tends to stay in a trend than it does breaking
+or forming a new one"* — he is leaning on trend persistence, not prediction.
 
-## Execution
+**He is never married to the bias.** News or an open-drive can invalidate it.
 
-1. **Anchor (4H)** — bias from high-impact 4H candles, commonly the **10:00 ET**
-   and **06:00 ET** candles.
-2. **Sweep** — wait for the candle to take out a key level (prior day high/low,
-   session high/low).
-3. **Shift (15m / 5m / 1m)** — require a **Market Structure Shift (MSS)** or
-   **displacement** proving the fakeout is done.
-4. **Entry** — on return to a newly formed **FVG**, **Order Block**, or
-   **Inversion FVG** left by the reversal.
-5. **Stop** — strictly beyond the manipulation wick.
-6. **Target** — Fibonacci extension, commonly **-2 to -2.5 standard deviations**
-   of the initial range, or the opposing liquidity pool.
+### 1b. Volume profile (built on 30-minute bars)
 
-## Filters
+Two profiles, both in use through the day:
 
-- **No volume, no trade.** Favour London/NY session overlap.
-- **Shallow wick exception** — a shallow wick means manipulation resolved fast;
-  trade the body expansion.
-- **Deep push exception** — if price pushes very deep against bias, structure is
-  broken: stand aside. **[AMBIGUOUS]** what depth qualifies.
-
-## Open questions for the transcripts
-
-1. **4H anchoring.** PO3 4H candles conventionally anchor to the **18:00 ET**
-   CME open (18:00 / 22:00 / 02:00 / 06:00 / 10:00 / 14:00), not the 09:30
-   equity open. Needs confirming. *(The current `data.session_anchored()`
-   anchors to 09:30 and is wrong for this model.)*
-2. **FVG definition** — 3-candle gap; does it need displacement to qualify?
-   What counts as mitigated/filled: touch, 50%, or full fill?
-3. **Order Block** — last opposing candle before displacement: body only, or
-   body+wick? Must it be unmitigated?
-4. **MSS vs BOS** — which swing qualifies, and does it need a *body* close
-   through, or is a wick enough?
-5. **Displacement threshold** — how large, relative to what? (ATR multiple?
-   Average body size?)
-6. **Liquidity pools** — which specifically: PDH/PDL, session H/L, equal
-   highs/lows, relative equal highs/lows?
-7. **Deep-push invalidation** — the percentage or level that says stand aside.
-8. **Fib extension** — anchored to what exact two points?
-
-## Instrument implications
-
-| Instrument | PO3 fit |
+| Profile | Window |
 |---|---|
-| **BTC/USD, ETH/USD** | **Best fit on Alpaca.** 24/7, so all six 4H candles are real, no gaps. Long-only and no bracket orders (see `universe.py`). |
-| **SPY, QQQ** | Only the 06:00-10:00, 10:00-14:00 and 14:00-18:00 candles carry meaningful volume. Overnight candles are near-empty. Alpaca's `overnight` feed may partially help. |
-| **Futures (ES/NQ)** | The model's native habitat — not available on Alpaca. |
+| **Session / overnight** | Futures session: **18:00 ET → 17:00 ET next day** ("closes at five, opens back up at six") |
+| **RTH** | NY open → NY close |
 
-## Caveat to keep in view
+Components:
+- **Value Area** — "68% of the total transaction volume of the given session"
+- **POC** — price with the most transactions; *"a magnet, fair value reference"*
 
-SMC/ICT constructs (FVGs, order blocks, liquidity sweeps) are easy to identify
-in hindsight and hard to define unambiguously in real time. Every rule above has
-to be pinned down precisely enough that code produces one answer, not a judgment
-call — that is what the transcripts are for, and what the backtester is for
-after that.
+Reads:
+
+| Observation | Meaning |
+|---|---|
+| Price **inside** VA | Balanced / neutral — rotates VAH ↔ VAL |
+| Break **above** VA + volume | Market finding value higher → favour longs |
+| Break **below** VA + volume | Market finding value lower → favour shorts |
+| **POC rising** session over session | Bullish continuation |
+| **POC falling** session over session | Bearish continuation |
+| New high/low on **thin** volume, snap back into VA | Rejection — fade it |
+
+Key insight he stresses: candles alone mislead. A new low with no volume that
+immediately returns to value means *lower prices were rejected*, even though the
+candle chart shows a lower low.
+
+---
+
+## 2. LOCATION — where do I engage?
+
+### 2a. Supply & demand zones
+
+Drawn on 4H, 2H, 1H, 30m, 15m.
+
+**Rule:** find an **obvious** large expansion move, then mark the
+**consolidation/balance immediately before it**. That consolidation is the zone.
+
+> "Mark out the consolidation, which again is going to be the value area before
+> the expansion."
+
+- **If the move is not obvious, skip it.** *"If the move down or up isn't
+  obvious, I suggest you just simply stay away."*
+- Zone strength = how many times price has since respected it (hold, or
+  break-and-retest).
+- Logic: institutions cannot fill size in one go, so they accumulate in the
+  consolidation before driving price. The zone is where their fills sit.
+
+### 2b. Volume profile levels
+
+| Level | Use |
+|---|---|
+| **POC** | Target / magnet. **Never enter blindly at POC** — price chops there |
+| **HVN** (high volume node) | Acceptance, consolidation, slow price. **Do not enter in the middle.** Use as a target where price stalls |
+| **LVN** (low volume node) | Thin — price moves through fast. Either sharp rejection or fast breakout |
+
+**The highest-quality setup is confluence**: an S/D zone that is *also* an LVN.
+Expect a quick, decisive reaction. Conversely, a supply zone with an LVN *above*
+it means: if it breaks, expect an immediate run through the thin area.
+
+---
+
+## 3. CONFIRMATION — the trigger
+
+> "which is gonna be our confirmation part later in this video, which is
+> probably the most important part"
+
+Tools: **Bookmap heatmap**, **footprint chart**, **DOM**.
+
+Two object types on the heatmap:
+
+| Visual | What it is |
+|---|---|
+| Green / red **bubbles** | **Aggressive** market orders being filled. Bigger bubble = more volume |
+| Orange / red **lines** | **Passive** resting limit orders — the millions/billions waiting |
+
+### The entry trigger (this is the precise rule)
+
+**Both sides must turn. One is not enough.**
+
+At a **supply** zone, to go short:
+1. Price pushes up into the zone
+2. Aggressive **buyers get progressively smaller** — exhaustion
+3. Aggressive **sellers step up** and start moving price down
+
+At a **demand** zone, to go long:
+1. Price pushes down into the zone
+2. Aggressive **sellers shrink or disappear**
+3. Aggressive **buyers step up** and start moving price up
+
+> "You're not only waiting for one side to die out or get absorbed, you're
+> waiting for the other side to step back up and then fully take control. This
+> is what you have to use as an entry."
+
+**Disqualifier:** if price enters supply and buyers stay aggressive and blast
+through — no trade. *"Assuming makes a fool out of you and me."*
+
+---
+
+## 4. Stop loss
+
+At **thesis invalidation**, not at a fixed distance.
+
+> "I want to put my stop loss where my thesis is invalid. If I'm looking for
+> longs, I think this is going to be a higher low. I'm going to put my stop loss
+> underneath that higher low because if we make a new low, my thesis is
+> incorrect."
+
+## 5. Targets
+
+- **POC** as the primary magnet
+- **HVN** where price is expected to stall
+- Opposing value area edge
+
+## 6. Trade philosophy
+
+- Wants **fast** moves — *"I don't want to just sit and chop"*
+- Never married to a bias
+- Spread ignored on ES (too liquid to matter) — **this does not hold for
+  equities or Alpaca crypto**
+
+---
+
+# Alpaca feasibility
+
+| Component | Alpaca | Notes |
+|---|---|---|
+| 4H market structure | ✅ **Full** | Swing sequence from bars |
+| Volume profile, VA, POC | ✅ **Full** | From 30-min bars, better from SIP ticks |
+| POC session-over-session trend | ✅ **Full** | |
+| HVN / LVN detection | ✅ **Full** | |
+| S/D zone marking | ✅ **Full** | "Obvious expansion" needs a numeric threshold |
+| Zone × LVN confluence | ✅ **Full** | |
+| Invalidation-based stops | ✅ **Full** | Swing-based |
+| POC/HVN targets | ✅ **Full** | |
+| **Aggressive flow** (the bubbles) | ⚠️ **Approximate** | `elder/orderflow.py` classifies trades buy/sell from SIP quotes. Needs `feed: sip`. On IEX it is noise |
+| **Passive liquidity** (the lines) | ❌ **Not available** | Requires CME depth-of-book. No equities equivalent exists at this price point |
+
+**Verdict:** Context and Location — the majority of the framework — are fully
+automatable. The Confirmation trigger as he *states* it is about **aggressive**
+participants shrinking and flipping, and that is approximable from SIP trade
+data. The passive heatmap lines inform his read but are not the stated trigger.
+
+**`feed: sip` is now mandatory, not optional.** On IEX the confirmation step
+cannot be built at all.
+
+---
+
+# Instrument ranking (revised again)
+
+Volume profile and order flow both require the venue to see a representative
+share of volume.
+
+| Rank | Instrument | Why |
+|---|---|---|
+| 1 | **SPY, QQQ** | Closest to ES/NQ. Deep, well-distributed volume; SIP ticks give usable profiles and flow |
+| 2 | **IWM, SMH, XLF, XLE, TLT, GLD** | Liquid ETFs, clean profiles |
+| 3 | **NVDA, AAPL, MSFT, TSLA, AMZN, META** | Workable; single-name headline risk |
+| ❌ | **Crypto (BTC/ETH/SOL)** | **Drops out.** Alpaca sees a small slice of global crypto volume, so the volume profile is not representative — the core of the method breaks. (Under the PO3 draft crypto ranked first; that reverses here.) |
+
+---
+
+# Open questions — need a number before coding
+
+1. **"Obvious" expansion** — what multiple of ATR (or consecutive-bar range)
+   qualifies a move as obvious enough to mark its origin?
+2. **Equal highs/lows tolerance** — within what % are three highs "equal"?
+3. **Swing definition** — what fractal width defines the HH/HL sequence?
+4. **Acceptance outside VA** — how many bars, or how much volume, before a
+   break counts as acceptance rather than a poke?
+5. **HVN / LVN thresholds** — what percentile of the volume-at-price
+   distribution marks a node high or low?
+6. **"Getting smaller"** — over how many bars/trades must aggressive size
+   decline monotonically to count as exhaustion?
+7. **"Step up and take control"** — what delta flip magnitude confirms it?
+8. **Equity session mapping** — the futures 18:00→17:00 profile has no exact
+   equity analogue. Use 04:00→20:00 extended hours, add Alpaca's `overnight`
+   feed, or RTH only?
+9. **Zone timeframe priority** — when 4H and 15m zones conflict, which wins?

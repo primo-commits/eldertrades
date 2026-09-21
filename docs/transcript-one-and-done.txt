@@ -1,0 +1,355 @@
+My Entire Day Trading Strategy Explained In 30mins
+
+Transcribed by TurboScribe. Go Unlimited to remove this message.
+
+(0:00 - 0:10)
+For any good setup, you need three things. You need context, you need location, and then you need confirmation. So in this video, I'm gonna be going over my entire trading system.
+
+(0:10 - 0:22)
+I like to call the one and done model. For reasons you guys will see later on in this video. I have been trading for over a decade and I've traded live in front of hundreds of people for the past three years.
+
+(0:22 - 0:33)
+And to start off, we're gonna be using context. There's gonna be a raw unedited video straight to start to finish. You guys can have a good idea of how I like to look at the markets and how I like to trade the markets, right? Right, here we have a naked chart of the ES.
+
+(0:33 - 0:42)
+And the first thing for me to really get a bias on the day. So before the market opens, I come in and I do my pre-market planning. I want to first gauge context of the market.
+
+(0:42 - 1:17)
+Where is the fair value? Where is the value lacking? Where is the volume? Basically, which is fair value and what is the overall structure of the market? So long-term trend, the first thing that's really kind of the easiest thing to identify is figuring out, right? What is the overall structure and trend of the market? Why this is so crucial to me is because on average, like let's just zoom out as far as we possibly can here, right, in the market. You will see the market continuing a trend, right? Then forming or breaking a new one. So the market will either be making higher highs, higher lows, lower lows, lower highs or in a consolidation period.
+
+(1:17 - 1:26)
+It doesn't do anything else but instead of those three things. In the market, on average, any timeframe tends to stay in a trend than it does breaking or forming a new one. So we're just trying to lean probability on our side.
+
+(1:26 - 1:44)
+And if you get a good picture of the overall structure or context of the market, it kind of really can help us form an overall bias. But remember by the end of this, I'm never going to be married to an overall bias. I could have a beautiful idea of the market before the open then we can have massive selling pressure, buying pressure come in, news drop, especially with Trump recently and it changes my whole bias.
+
+(1:44 - 2:03)
+So never married to a specific thing because I know the market can have anything happen especially at the New York open. So if we are going to be in a consolidation period in the market, right? That means I'm looking at the four hour timeframe only. So I'm on the four hour timeframe to find out what my key levels are going to be or what my structure or context is going to be.
+
+(2:04 - 2:37)
+So we're in a balanced range, meaning I'm looking for price to make one, two, three, one, two, three, three equal highs and three equal lows. If the market is sitting like that, we're going to be in what I call a balanced longer timeframe range, right? If the market is imprinting on the four hour timeframe when we see the market making higher highs and higher lows, two higher lows, three higher highs, I'm then going to say in my pre-market plan, we are in a bullish longer timeframe market. And if the market again is making the same thing, right? Two lower highs and then three new lows, we are in a bearish overall timeframe range.
+
+(2:37 - 2:48)
+That's how I identified the overall concept of the market. Sometimes you will see the market behave in weird ways in the higher timeframe where you don't have a clear structure. And at that point, my bias is going to be shifted for the day.
+
+(2:48 - 3:02)
+I'm mostly going to be looking to reacting to the market to get a better structure read after the open versus having one already predetermined in my head before the market opens. That's the first thing I look at to determine the overall structure of the market. The next thing is going to be even more important, which is going to be the volume profile.
+
+(3:02 - 3:16)
+And this is what's going to give me the overall arching theme or where the value is sitting for the current session. So structure is one thing, but you can bind structure with the structure of the volume profile. It's going to be shifting completely.
+
+(3:16 - 3:25)
+And if you don't know what the volume profile is, I'll go ahead and link a YouTube video. Or honestly, I'll just link my entire free course down below, which has a section that covers the volume profile. It's free.
+
+(3:26 - 3:39)
+It's literally like a bunch of hours on content on my strategy goes really in depth on every single little thing. Down below, go check it out. But before we get into it, the timeframe in the volume profile does matter to me.
+
+(3:39 - 3:53)
+I use a 30 minute to determine the overall session. And this volume profile is going to give me where the most transactions were taking place on any given session. So it's the future session opens up pre-market and basically whenever the futures market opens and closes when it starts reading that data.
+
+(3:53 - 4:04)
+So closes at five, opens back up at six. So from six that day, all the way to five the next day is where the volume profile is going to be giving me this data, right? There's different volume profiles I use as well. That gives me like the overall session.
+
+(4:04 - 4:20)
+So for example, the one I have here on my trading view, this volume profile right here where we're hiding it shows me the overall volume profile for the open, the New York open, all the way to the New York close. So it was a different volume profile there. And I will look to use both of these volume profiles throughout the day.
+
+(4:20 - 4:29)
+But for first thing is context, right? For context, we have the structure. So the next thing I'm really gonna be paying attention to is going to be the overall volume profile. And let me try to see if I can make this a little bit better.
+
+(4:29 - 4:35)
+Okay, so right here we have a map of just the volume profile. I have removed all the candles that are still here. If you kind of hover over them, you could see it.
+
+(4:36 - 4:48)
+But I only have the volume profile overlaid. And there's a couple of obvious things you can just start to picture when you see this volume profile, right? You see number one is this blue box and this yellow line. Which again, if you check out the free course, we'll talk about more in depth on what this is.
+
+(4:48 - 5:02)
+But this is basically the value, right? This blue box is the 68% of the total transaction volume of the given session. And the yellow point of control line is going to be where the most transactions were taking place. And what this gives me, right, is where price is fair.
+
+(5:02 - 5:39)
+Where is there a fair price point? Where is price at balance? Where are the most amount of transactions that have been taking place? And where are there no transactions taking place? Where is the volume thin, right? And the first thing you can kind of use this off of is to kind of determine a stronger trend of the market instead of relying on just candlesticks, right? You can start to rely on the overall trend, right? So for example, if the market is trending up, right? Putting in new highs, putting in new highs, you could assume we're bullish, obviously, just by looking at candlesticks. But when you're looking at a volume profile and you see the market putting in new highs, but the point of control of the market where the fair value is is actually at the lows. It's not moving up as we're putting new prices.
+
+(5:39 - 5:51)
+I mean, there's less interest as prices are moving up. There's a great signal for a reversal or a trend shift or a continuation. But what I like to do, right, is determine where the trend is of the market as we're moving down or as we're moving up.
+
+(5:51 - 6:12)
+So for example, we made this big move down and every single day we had lower and lower points of control, lower, lower levels of interest. So before we get into what these levels actually mean, right, what the trend is signifying based off of where the point of control is moving is every single session, we have more transaction where prices fair is gonna be at lower prices. So we're moving down and more people wanna transact at lower prices.
+
+(6:12 - 6:29)
+It indicates a great continuation of a shift down. In the first kind of session where we have, right, a higher point of control, we then see the market start to shift structure and potentially start moving back up to the upside. Even on a day like this, right, where we have the market go all the way down here, right, yet the value here is dead.
+
+(6:29 - 7:10)
+The market pushes back up and then closes back above, giving us a higher point of control, indicating the market is still potentially bullish, right? Versus if you were just looking at a candlestick chart, what you would have seen here is the market then come up, put a high, right, come back down, put in a new low, and the next day come back down and put in a new lower low, you probably would have shifted to being okay, we could be bearish now, right? In reality, at these new lows, the volume was thin and we closed back up here with thick value participation, thick areas of interest. So you can think of the volume area, right, this volume profile as showing you where the market has accepted price and where it has rejected price. So if we're inside the value area, right, we are balanced, we are neutral.
+
+(7:10 - 7:47)
+This is a fair point where both buyers and sellers agree on price and want to transact inside. Now price can rotate a lot once we're in these value areas, the value area high, value area low, and point of control, it'll be in a balanced session controlling this kind of why when you see ES open up and we're trading, we form a value area like we're doing right now, price is going to be trading back to the value area high, back to the value area low, we are balanced. We're gonna continue to balance up and down, up and down, and that's why breaking out of these value areas will create a very, very high probable setup because again, you're paying attention to where is the interest, right? Where are people interested in trading? So if we break above the value area, the market is finding new value higher.
+
+(7:48 - 8:05)
+They're interested in higher prices, right? You generally want to favor longs if we're seeing higher volume at the higher volume area. Below the value area, same exact thing. If we're breaking underneath the value area of the session and we see volume start to pick up, the market is then finding value and interest at lower prices, giving you more strength to a bearish bias.
+
+(8:05 - 8:36)
+Remember, all we're doing, number one here is identifying the context of the market before we get into location, before we get into confirmation. Now, price can leave value quickly and come back inside, which is why watching order flow, basically the volume of transactions above it underneath the value area is very important to see if we're finding acceptance above it or we're finding the exact opposite of rejection for us to come quickly and whipping back into the value area. And the biggest thing is going to be this point of control, which is act as a massive, right, potential support resistance level, but not automatically, it's not automatically.
+
+(8:37 - 8:59)
+It's a magnet, fair value reference. The points of control act as magnets more than anything, right? And the edges of the value area high and low are usually more useful for kind of determining market is accepting or rejecting areas or finding new or more value or more fair prices above or below the current value area. So we're not looking at candlesticks here, we're finding where the transactions are actually taking place versus just looking at a naked candle.
+
+(8:59 - 9:12)
+The naked candle won't give us an incredible amount of information, especially higher, like longer timeframe, right? Because again, you can see a new low be put in, but there's no volume with that new low. We instantly slap back to the value area. What is that telling us, right? We rejected lower prices.
+
+(9:13 - 10:05)
+We don't see good value at lower prices, so the market is most likely to continue back up. So, you know, the simple framework you could use for structure here is inside the value area, we're going to be balanced, right, we're outside of value area and we find acceptance, right? We're gonna be bullish as a trend continuing, especially if day after day after day, we keep finding value underneath the previous value area. Now that we have context, right, we can read context off of just market structure and then off of the points of control and off of the volume profile, we then want to find location because now we have idea of structure, right? We know where the market might want to be heading next, we know what the market might want to be doing next, we know where all the value is, we know if we're in a balanced market, we know if we're in an in balanced market, where are we looking for our trades now? Because I like to think of it like this, right? Context is gonna give us the potential direction and the magnet where the market might want to be going next, where the market is most likely to be going next, where the market's more valuable, right? And what our bias is aligned to.
+
+(10:05 - 10:31)
+The next thing we have to find is what's the location, right? We know where the market could be going next, where is the location where we want to enter ourselves or enter the trade to align ourselves with again, the total amount of fair value, the big participants, to actually the highest probability of our trade being taken out in profit, right? Has the highest probability of our invalidation level be actually defended. And for this, we're gonna be using two separate things to kind of find and identify these key levels. And for me, what I do is I use supply and demand levels.
+
+(10:31 - 10:45)
+So my supply and demand is key in any given market, right? It's any market, auction market, real estate market, car market, supply and demand. So it gives us the overall, it's what moves the market, right? Any kind of iPhone, for example. Supply and demand is what's gonna move the prices of the iPhone for anything.
+
+(10:45 - 10:53)
+Supply and demand is what determines the overall price. So the first thing we have to do when finding these key levels is look at supply and demand. I'm gonna show you guys exactly how I do that.
+
+(10:54 - 11:07)
+All righty, so now we have a naked candlestick chart here, right? And for me to find the supply and demand levels, I'm gonna look at different timeframes, four hour, one hour, 30 minute, two hour, 15 minutes. Again, that full free course covers all of this in depth. I'll link down below.
+
+(11:08 - 11:20)
+But first things first is supply and demand. Then we're gonna get into the volume profile levels as our location levels as well. But the first thing's simple, and especially when those two match up, it's crazy, is finding levels on a chart where we have seen a significant reaction.
+
+(11:20 - 11:31)
+I used to get tripped over this, like I used to get like super locked into these levels. And then I started to think about how these levels are just locations on a chart where we could see reactions. I don't mean I'm gonna take a trip as soon as we get to it.
+
+(11:31 - 11:56)
+The locations and levels where I'm looking for a reaction off of the tape, which is gonna be our confirmation part later in this video, which is probably the most important part. But I used to get tripped up on these levels because sometimes you see something that looks like a level, you're not sure if it's a level, I don't know if it's a level here, not a level here. And what you gotta do is stay focused and just find the obvious levels, right? And what I mean by that is just by staring at this chart naked, right, you can see some points where the markets have a crazy reaction, more likely than others.
+
+(11:56 - 12:17)
+So a good example is going to be this massive move down right here, right? You can all automatically, this is a pretty crazy move, right, right here. This level right here, this level right here, or this move down right here, it's not drawing, right? Another obvious one, right, right here to the all the way to the right or left of my chart. These are obvious massive moves down and up, right, we have one right here, we have one right here.
+
+(12:17 - 12:42)
+If the move down or up isn't obvious, I suggest you just simply stay away. Now, what I like to do with these levels, right, is mark out the consolidation, which again is going to be the value area before the expansion. So if you think about it, you know, without looking at a volume profile, consolidation is most of the time going to be the value area, right? An expansion down or up is the market then finding value underneath or above that value area.
+
+(12:42 - 13:12)
+And usually before that big move down, you have consolidation or a neutral period, all the orders are being filled, we're finding value, we're in balance before the market goes into imbalance. So I wanna mark out that balance level, basically where we have the consolidation, right, right before the big expansion is down, so right here is going to be one and right before the big expansions up. And you can kind of see just by me literally just drawing these zones, how much the market has actually reacted to these levels, right? How much the market has either respected, broken and retest levels and actually held.
+
+(13:13 - 13:37)
+You can then tell how strong these levels actually are. And I mean, you literally just, I wanna do for practice as I would just start drawing these levels, right? Drawing these levels back to back to back and seeing what price has been doing at these levels and just kind of seeing how well, right, these levels get respected, both either on a break retest of them or just, you know, get held and invalidated throughout the entire time these levels are active. They're strong points, they're strong fair value points before we get expansions up and down.
+
+(13:37 - 13:59)
+This is the first thing I'm watching, right? If I have structure, I have like a context with a volume profile and then just the overall price action, next thing is going to be these, for me, supply and demand zones where I've seen the market have a lot of opportunity. So when we get back into these zones, is when I start to read order flow for confirmation. So these zones are just telling me where the market has had a reaction, where we've seen value, we've seen a lot of orders be filled.
+
+(14:00 - 14:11)
+And when we, once we get to these zones, I can then start washing the tape to see if the same thing kind of happened. So for us to start making a move down like this, we usually will start seeing a lot of absorption of aggressive buyers. So if you come back into the zone, I start to see the same amount of thing.
+
+(14:11 - 14:19)
+I look at the heat map and I see a massive amount of passive sellers sitting here. We come into the zone when we see a lot of absorption of buyers. That's where I would look to actually start placing a trade.
+
+(14:20 - 14:30)
+These are only levels where I've seen massive or abnormal reactions from buyers and sellers where we've seen big moves come out of these levels. Because again, when I'm in a trade, I don't want to just sit and chop. I don't want to just sit and do nothing.
+
+(14:31 - 14:56)
+I want to be in a trade where the market moves fast in my direction, so I can get in and out as I possibly can. And at the best chance of aligning myself, sorry, with the big money, because to make a move down or a move up like this, we need a lot of money, like hundreds of millions and not billions of dollars. And where they fill is right here, because if you think about it, if a big firm or an institution is wanting to short the market right here, they don't want to get in short as the market's moving.
+
+(14:56 - 15:03)
+They want to make the market move. They're the market makers for a reason. So they will get into their positions right here, right? If they get in all the way down here, they lost.
+
+(15:03 - 15:23)
+There's too late, right? They want to get in all the way up here, which is why the market chops around for a while, because usually to get into such a massive position size, which is what they do, they can't get in all at once. They have to break their orders slowly and slowly, which is why you start to see that absorption when you get to these key levels. So these levels allow us to position ourselves with where all the money is sitting at step number one.
+
+(15:23 - 15:35)
+The next thing is going to be the volume profile. So the volume profile is going to give us different locations, and a lot of times it will align with the supply and demand zone. So the point of control, right, the fair value is going to be the magnet.
+
+(15:35 - 16:07)
+I usually won't blindly enter at the POC because price can chop around it because it is fair value, but it's really nicely used as a target, right, as a magnet level, or as confirmation that the market is balanced, right? If price is far from the point of control, there can be a tendency, again, it's a magnet to rotate back to it. Now, high volume nodes, right? You see an example where you see the market have high volume, like right here, right here, and obviously sometimes it'll be in the point of control. Sometimes they won't, like most of the times it'll be in the high of the volume point of control, but sometimes you have high volume at different locations.
+
+(16:08 - 16:18)
+This is acceptance, right? Heavy business, people are acting here. They're transacting. And price often is going to slow down and spend a lot of time at these high volume nodes, because again, what is a high volume node? A lot of transactions.
+
+(16:18 - 16:32)
+How do you get a lot of transactions in one location? Consolidation, right? So the market will tend to be slow here. And I will treat these high volume nodes like a zone to avoid to enter anything in the middle. Or again, a target where price may kind of stall, so the TP level.
+
+(16:32 - 17:13)
+But I look to trade off these high volume levels when they're combined with supply and demand, because if we start to get into this level, we see consolidation there, whenever we break out or see acceptance above or below the value area, that's where I look to follow, right? The next thing is going to be key. These are called the low volume nodes, right? This is a rejection type of tool or type of theory you can kind of use, right? Think rejection and think thin areas, very thin areas in the chart where you usually will see, right, either fast breakouts, like really, really fast follow through at these levels, or kind of what you see here, or right, you'll see rejection. So price often moves through these areas faster because the market previously did not want to spend any time there, because that's what a low volume node is.
+
+(17:13 - 17:20)
+Not much amount of transactions. The market didn't spend any time there, so it shot right through. And this makes price move faster.
+
+(17:21 - 17:44)
+And the low volume nodes can be used as really good support and resistance locations, especially if they line up with the key supply and demand level. So if we have like a key demand level down here, we have a low volume node, like you can use these in two separate ways. I'm gonna kind of break it down for you right here, right? If we have a demand zone down here, and it's also a low volume node on the volume profile, so low volume node, we see price come down into the zone.
+
+(17:44 - 18:09)
+That's when you can expect a quick breakout, a quick bounce from that level, because what a low volume node is going to show us is that price did not want to transact there, right? Nobody was interested in these lower prices, so never get back into that low volume node. When we see a decrease of volume, you can see the exact same reaction, a quick rejection right through. The next thing we can do, right, sometimes you can use it for breakouts or take profit levels, but if you see the market, right, have, for example, a supply zone right here, so we have supply.
+
+(18:09 - 18:26)
+And above that supply zone, right, we have a lot of volume here, and then just thin volume above the supply zone. So if you see price come into this level, right, the tape shows you that you don't want to short here, there's a lot of aggressive buyers, and the market then breaks out of this level. Here, you can expect the market to then shoot straight through that low volume node, right, because again, there's no time there.
+
+(18:26 - 18:42)
+The market doesn't have any resistance points there. You see the market shoot straight through, right? A good example is kind of what's happening right now. We have a low volume node here from the session open, and as soon as we tap the low volume node, we instantly reject, right, because you see low volume as you tap in, or we come back into that low volume node and then you see no resistance in the market just shooting straight up.
+
+(18:42 - 19:23)
+That's how you can use low volume nodes because they're pretty much the most important part about the volume profile other than the overall points of control, but these are the locations, right? We know context based off of volume profile. We know context based off of the overall structure of the market. Then we have location, right? We know exactly where we want to see, or where we want to start watching for an entry in the market because we know the market might be going up, right, because overall context and structure of the volume profile, but then we also want to know where the market could be making that new high, right, where the market has been stuffing those orders, where there are low volume nodes, where we can get into a position where we can have a valid stop loss, because if you just get in randomly right here, we could chop around, we can sell back off before continuing up.
+
+(19:23 - 19:29)
+We don't have good invalidation. For me, invalidation is going to be super key. I want to put my stop loss where my thesis is invalid.
+
+(19:29 - 19:38)
+I mean, if I'm looking for longs, right, I think this is going to be a higher low. I'm going to put my stop loss underneath that higher low because if we make a new low, my thesis is incorrect. The market's not bullish.
+
+(19:38 - 19:58)
+We're making new lows, so I want to get out of the trade as fast as possible, and that's why it's super important to have a good location, right, not only you're going to align yourself with the big money, right, but you're going to align yourself with the opportunity of the best validation, which gives you the best opportunity to stay in the game for as long as possible. I mean, literally, it's the market right now. What do we have pre-market? Right, we have this big move up, obvious, and consolidation right before.
+
+(19:59 - 20:11)
+What has the market been doing off the open? It's been holding this level. I can tell how strong that actually is, and look at the volume profile just for the overall session, right? Where is most of the value, right? Thin volume down here, we bounce off of it pretty quickly. Now we're chopping around with it.
+
+(20:11 - 20:27)
+There is a value area. That's just for the session. If you pay attention to where price is right now, like what do you see here, right? The value area for the overnight session is literally at that demand zone, at the demand zone, like the most of the volume for the overall session is at this demand zone, which you keep holding, and we keep consolidating towards it, and we're putting in these new highs.
+
+(20:27 - 20:51)
+So it's very key to combine these two for context and location. The next thing now is confirmation, right? Now we want to know, once we get to these key levels, how do I know the market's going to bounce? How do I know the market's going to reject? How do I know the market's going to break through? And for this, we have to use something called order flow, or something called, you know, reading the aggressive and passive orders coming in and out of the market in real time to determine what the market's actually going to do. And for this, we use something called a heat map.
+
+(20:52 - 21:04)
+We use something called the volume footprint chart. We use something called the DOM that shows us the volume of all the transactions, both aggressive buyers, aggressive sellers, both passive buyers and both passive sellers at these locations. So for this, we're going to use a couple of different tools.
+
+(21:05 - 21:11)
+First tool is going to be something that I like to call the heat map, which is basically a book map. I don't, it's just what it's called. Not I like to call it.
+
+(21:11 - 21:23)
+And this tool is going to give us a very visual representation of all the aggressive and passive participants coming in and out of the market. So it's a very, very clean and useful tool. With this, you can combine it with a bunch of different things.
+
+(21:23 - 21:29)
+You can combine it with a volume profile. Now you guys are probably looking at this. You're probably following along with me the entire video, being like, oh, easy.
+
+(21:29 - 21:54)
+I can volume profile, easy, structure, easy, find a man, easy. Now what the hell am I looking at? What is this crazy mess? And I'm going to try to make this very simple on you guys because it looks more confusing than it actually is. It looks crazy if you've never seen it before, but if you understand exactly what you're looking at, it's going to be a bigger, much, much bigger, useful tool in your arsenal, basically.
+
+(21:54 - 22:04)
+So when we are, we're looking at something called a heat map, which is this right here. Again, make sure you guys check out that free course down below. It gives you everything you need about my order flow tools.
+
+(22:04 - 22:21)
+And also, I'm going to be trading live for free this entire next week. If you guys want to watch me for free next week, link down below in the description so you can see me use this exact concept, the exact theme in this whole playbook live in the market so it makes more sense and it clicks. I'm like a visual learner, so if I see somebody do it, it clicks that much faster in my head.
+
+(22:22 - 22:33)
+But think of it like this. It is very easy to read a heat map once you understand what you're looking at. You're going to have two different kind of bubbles, right? You're going to have a green bubble, right? A green bubble, and you're going to have a red bubble, right, a red bubble.
+
+(22:34 - 22:42)
+Those are the two bubbles you've seen, right? Just by using your brain here. What's a green bubble, right? Buyers, duh. What's a red bubble? Sellers, duh.
+
+(22:43 - 22:56)
+And these aren't just buyers or sellers, right? These are buyers and sellers who are aggressive. These are market orders that are coming into the market. So to make it simple, right? A green bubble is showing you a buyer that wants to buy at higher prices.
+
+(22:56 - 23:06)
+He has a market order, so he doesn't care that he gets filled at a higher price he wants in right now. A red bubble is a seller who wants to sell at lower prices. He accepts that he's going to be selling at a lower price.
+
+(23:06 - 23:11)
+He doesn't care if he wants to get in right now. Now, if you press trade right here, let's just go into paper trading. I'm going to show you guys something.
+
+(23:12 - 23:19)
+Let's open up this panel. You guys use this every single day. I don't even understand what it is, most of you guys, but right here you see sell and you see buy.
+
+(23:19 - 23:29)
+You'll see how buy is always more expensive than sell. If you want to use a market order to get in, right, getting in right now, which you guys use every single day, if you want to buy right now, you're going to pay more expensive price. If you want to sell right now, you're going to pay a cheaper price.
+
+(23:30 - 23:43)
+And the spread is going to be the difference in the middle. You can, don't worry about the spread because you're trading ES futures, the spread is so thin and so liquid, it's irrelevant. But remember that it's important because if you're willing to buy and you're willing to pay a higher price to get in right now, you're aggressive.
+
+(23:44 - 23:48)
+You don't care that you're paying a higher premium. You want to get in right now. If you're trying to sell, you don't care that you're selling for cheaper.
+
+(23:48 - 23:51)
+You want to get in right now. That's why there's always going to be a buy. It's always going to be higher.
+
+(23:51 - 24:09)
+Sell is always going to be cheaper, even though if it's only a tick, the vast determines the difference between aggressive buyers and then aggressive sellers. That's the first concept, right? That's very, very easy to understand. The next concept about using something like the heat map is you'll see prices sitting right here, right? If you see orange or red lines above price, those are passive limit order sellers.
+
+(24:09 - 24:23)
+So if you're placing a trade right here, right? You have a limit order. So let's say I only want to buy, right? I only want to sell ES if the price gets to 720. So you place your limit order at the 720 and that's where you'll get filled, right? 720, you'll get filled right here.
+
+(24:23 - 24:26)
+You can get in whatever price you want. Price doesn't not get there. You won't get filled.
+
+(24:26 - 24:38)
+If you want to buy, right? This is the current price. Any orange or red line below price on which you see on the heat map, right, is going to be a passive buyer. So if you want to buy, right, you'll put a limit order to buy down here.
+
+(24:38 - 24:51)
+And that's cool for you, but it doesn't really matter for you. Like who are you? You're so small, right? You're a minnow in the big, big sea of sharks. So what these lines actually represent when we're looking at the tape here are going to be the aggressive or are going to be the massive, massive participant.
+
+(24:52 - 25:08)
+So these dark red and orange lines are the billions and millions of dollars of orders sitting the market waiting to get filled. These green bubbles represent billions and millions of dollars of aggressive orders getting filled in real time. The bigger the bubble is, right, the more volume, simple.
+
+(25:08 - 25:14)
+The more red the line is, the more volume. Also, you can see the numbers of the lines here. So you can kind of tell like which one's bigger and which one's smaller.
+
+(25:15 - 25:48)
+You want to focus on the ones that are big, obviously, right? So zooming out here on the tape, this is going to make it easy for you, right? As we move up, what do I want to see in the order flow to take a trade? Let's say the overall market is bearish. We have supply right up here, right? We have a massive supply zone up here. What do we want to see to actually press sell? Number one, if we push up into this level and we see aggressive buyers getting bigger, bigger like it was here, and moving price up and getting bigger and bigger, do you want to short? No.
+
+(25:49 - 26:03)
+But fifth grade terms, if we see the market push up higher and higher and higher and we see the aggressive buyers getting smaller and smaller and smaller, what is that telling us? Aggressive buyers are not wanting to transact here. This is a sell level or supply level. Aggressive buyers are getting exhausted.
+
+(26:04 - 26:13)
+They are done trying to take the market up. They're not willing to take the market up anymore. And then what does that tell you, right? What does that tell you in a supply zone? Okay, buyers don't want to buy in supply.
+
+(26:14 - 26:24)
+Common sense, what does that tell you? Okay, cool. Next thing is we then see sellers start to step up in supply, which is a supply as a sell level where we've seen historical sellers be aggressive before. That's what a supply zone is.
+
+(26:25 - 26:36)
+We see sellers come back. What is that telling us? And move price down, right? Use common sense when looking at the order flow and it will make a massive difference and it will help you actually be consistent. So what it's telling us, right? We come into supply.
+
+(26:36 - 26:45)
+We see buyers get smaller and sellers get bigger. What is that saying, right? We also see like a bunch of orders here that are holding the buyers. We come back down.
+
+(26:45 - 26:52)
+This is where we saw that demand we just marked out. Historically, right? What do we see here that made that demand level? We came into this level. What do we see? Sellers get smaller, disappear.
+
+(26:53 - 26:55)
+Buyers are stepping up. Then we can aggressively move up. That makes this demand zone.
+
+(26:56 - 27:03)
+We come back down into this demand zone. What do we start to see, right? Right here, it's not as obvious. Sometimes it won't be that obvious.
+
+(27:03 - 27:15)
+We see sellers get bigger and bigger and the market instantly reverses up. Not obvious, I'll say away, but we come back into this zone and when we come back into this zone the second time where we actually make the bigger move, what happens? This is a great learning opportunity right here live. Market came into this zone.
+
+(27:15 - 27:18)
+We see absorption. It's hard to tell. You see bigger sellers as we move down.
+
+(27:18 - 27:26)
+You probably would have stayed away from this trade. So I would have potentially stayed away as well. We then move down, right? And looking at this in hindsight, it's much easier.
+
+(27:26 - 27:37)
+So you're only gonna get like live during this. When I would have seen this, I probably would have taken this first long, which I did, right? And actually try to ride this wave up. And it did go up a decent amount, like 75 to 700, like it went up like 25 points, which is cool.
+
+(27:37 - 27:58)
+But the easier entry would have been, we come back down into demand and now what do we see that's even more obvious? We see sellers literally disappear and get smaller and then big buyers step up and start moving the market up. Now this is what you have to use for these entry triggers, guys. You have to wait for both sides to be showing you exactly what you want to see.
+
+(27:58 - 28:10)
+How do I cancel out of this? So basically you're not only waiting for one side to die out or get absorbed, you're waiting for the other side to step back up and then fully take control. This is what you have to use as an entry. This is what I use as context to actually enter the trades.
+
+(28:11 - 28:27)
+The first time it bounced off of it is the second time it bounced off of, right? And again, this is that confirmation we need, right? So now we understand we have context. We understand where the market might be going based off the volume profile, where the market might be headed to based off the current structure of the market. You know, there's a bullish, there's a bearish.
+
+(28:27 - 28:48)
+We have location. Where historically have we seen buyers or sellers take place? Where are the low volumes where we can see a quick rejection? Where are the high value areas where we can see consolidation and chop where the market is balancing the value? And then we can get into these zones, knowing the location, knowing the structure or context. The next thing I have to figure out, okay, is what's my confirmation to take trades? Like once we get to a key level, like I'm expecting the market to sell off from the supply.
+
+(28:49 - 28:57)
+But accepting and just assuming is stupid, right? Assuming it makes a fool out of you and me. You probably heard that saying before. So instead of assuming, okay, price side gets into supply where I'm thinking the market's gonna sell off.
+
+(28:57 - 29:05)
+I can never marry to a buy. So if you come up into supply and we see buyers be crazy aggressive and just blast right through. No, buyers aren't getting smaller.
+
+(29:05 - 29:17)
+Sellers are not stepping up. Do I wanna short? No, right? That's not giving me confirmation. But if we come up with supply and we see buyers get smaller and smaller and smaller and sellers step into the market, then do I wanna short? Yes, right? That is the key.
+
+(29:18 - 29:24)
+That is how I choose that. That's my entire one and done model. That's the entire system in hindsight, right? In a 30 minute video.
+
+(29:24 - 29:38)
+So keep in mind, guys, right? It's everything has to line up. Don't just be looking at book map and being like, oh, big bubble, I'm shorting, right? Don't just be looking at the structure or key level and be like, oh, the big seller came up here. So I'm gonna press sell just because we're at a key sell level.
+
+(29:38 - 29:49)
+No, look what would have happened here. We would have gotten blasted right through. Context, location, confirmation is everything, right? Remember guys, this entire free course going over more in depth.
+
+(29:49 - 29:55)
+My entire strategy, I'm gonna link it down below. If you guys wanna watch me trade live for free next week, make sure you click that link down below as well. I'll see you guys in the next video.
+
+(29:55 - 29:59)
+Any questions you have, put it down below in the comments or join the free discord, which will always be linked.
+
+This file is longer than 30 minutes.
+
+Go Unlimited at TurboScribe to transcribe files up to 10 hours long.
