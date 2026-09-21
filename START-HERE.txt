@@ -45,6 +45,21 @@ Everything is in this folder. Do these in order.
   Make sure it is your PAPER key, not a live one.
 
 
+  IF THE EQUITY LOOKS WRONG  --  Double-click  5-ACCOUNT.bat
+  --------------------------------------------------------------
+  Shows exactly which Alpaca account your API keys belong to and
+  what it actually holds.
+
+  API keys are tied to ONE specific paper account. If you have
+  more than one, it is easy to reset the balance on one account
+  while your keys point at a different one. Compare the ACCOUNT
+  NUMBER it prints against the one in the Alpaca dashboard.
+
+  The bot always sizes off the LIVE balance Alpaca reports, never
+  off any setting in a file. A wrong balance is not dangerous,
+  it just trades smaller.
+
+
   STEP 3  --  Double-click  2-CHECK.bat
   --------------------------------------------------------------
   This checks about 20 things that could break tomorrow.

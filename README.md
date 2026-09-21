@@ -47,6 +47,17 @@ paper account while `account.paper: true`).
 | `--ignore-clock` | Scan with the market closed (inspection only) |
 | `-v` | Debug logging |
 
+## Which account am I on?
+
+```bash
+python -m elder.account
+```
+
+Prints the account number the API keys resolve to, what it holds, and the
+position sizes that follow from it. API keys are tied to one specific paper
+account — if the dashboard and the bot disagree about equity, compare the
+account numbers first.
+
 ## Before you run it
 
 1. **Reset your Alpaca paper account to $1,000,000** in the dashboard. The bot
