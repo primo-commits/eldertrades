@@ -215,3 +215,53 @@ share of volume.
    equity analogue. Use 04:00→20:00 extended hours, add Alpaca's `overnight`
    feed, or RTH only?
 9. **Zone timeframe priority** — when 4H and 15m zones conflict, which wins?
+
+---
+
+# Implementation parameters (supplied 2026-09-21)
+
+| Parameter | Value | Where |
+|---|---|---|
+| Equal HH/LL tolerance | 0.5% | `strategy.context.equal_level_tolerance` |
+| Swing fractal half-width | 3 bars | `strategy.context.swing_bars` |
+| VA breakout confirmation | 2 closes outside + vol > 1.5x avg | `strategy.volume_profile.va_breakout_*` |
+| HVN threshold | ≥ 60th pct volume-at-price | `strategy.volume_profile.hvn_percentile` |
+| LVN threshold | ≤ 30th pct (complement, chosen) | `strategy.volume_profile.lvn_percentile` |
+| Exhaustion | 3 consecutive pushes, declining volume | `strategy.confirmation.exhaustion_*` |
+| Momentum flip | > 1 ATR move + vol > 1.5x avg | `strategy.confirmation.flip_*` |
+| Session | NYSE 09:30–16:00 ET weekdays | `data.rth_open` / `rth_close` |
+| ATR stop multiple | 1.5 | `strategy.exits.stop_atr_max_mult` |
+
+## Two places the implementation differs from the literal wording
+
+**1. ATR stop is a cap, not the basis.** The transcript is explicit that the stop
+goes where the thesis breaks, not at a fixed distance:
+
+> "I want to put my stop loss where my thesis is invalid... I'm going to put my
+> stop loss underneath that higher low because if we make a new low, my thesis
+> is incorrect."
+
+So `stop_basis: invalidation` is primary — the stop sits beyond the last
+confirmed swing (`structure.invalidation_level`) plus a 0.25×ATR cushion — and
+**1.5×ATR acts as a maximum**. If invalidation is further than 1.5×ATR away, the
+setup is rejected for being too wide rather than the stop being pulled in tight,
+which would place it inside the noise the zone is supposed to absorb.
+
+**2. Exhaustion direction.** The supplied wording was "3 consecutive bars of
+lower closes + lower volume". At a **supply** zone price is pushing *up* into
+it, so lower closes would already be the reversal, not the exhaustion that
+precedes it. Per the transcript:
+
+> "we see the market push up higher and higher and higher and we see the
+> aggressive buyers getting smaller and smaller and smaller"
+
+Implemented as: **continued pushes toward the zone, each on declining
+volume/aggressive size.** Mirrored for demand. `exhaustion_bars: 3` and the
+declining-volume requirement are kept as given.
+
+## Measured behaviour
+
+`structure.classify` on 300 random walks: **25% produce a directional bias**
+(38 bullish, 36 bearish, 224 unclear, 2 balanced). Structure alone is not an
+edge — which is precisely why the method requires location and confirmation on
+top. Useful as a baseline when the backtester reports a win rate.

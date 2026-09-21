@@ -64,5 +64,51 @@ screening:
   max_atr_pct: 0.06
   skip_earnings_window_days: 1
 
+strategy:
+  # Elder Santis "One and Done": context -> location -> confirmation.
+  # Values supplied by the user 2026-09-21; see docs/strategy-spec.md for the
+  # two places where they are applied differently from the literal wording, and
+  # why (stop_basis and exhaustion direction).
+
+  context:
+    structure_timeframe: "4Hour"
+    swing_bars: 3                  # fractal half-width: 3 bars either side
+    equal_level_tolerance: 0.005   # 0.5% -- three highs within this band are "equal"
+    # Bullish = 2 higher lows + 3 higher highs; bearish mirrors; balanced =
+    # 3 equal highs + 3 equal lows; anything else -> no predetermined bias.
+    bullish_higher_lows: 2
+    bullish_higher_highs: 3
+
+  volume_profile:
+    timeframe: "30Min"
+    value_area_pct: 0.68           # his "68% of the total transaction volume"
+    price_bins: 100
+    hvn_percentile: 60             # >= 60th pct of volume-at-price = high volume node
+    lvn_percentile: 30             # <= 30th pct = low volume node (complement of above)
+    va_breakout_bars: 2            # 2 closes outside the value area...
+    va_breakout_volume_mult: 1.5   # ...on > 1.5x average volume = acceptance
+
+  zones:
+    # "If the move down or up isn't obvious, I suggest you just simply stay away."
+    expansion_atr_mult: 2.0        # a move must exceed this x ATR to be "obvious"
+    consolidation_max_bars: 10     # how far back to look for the balance before it
+    consolidation_atr_mult: 0.75   # bars tighter than this x ATR count as balance
+    timeframes: ["4Hour", "1Hour", "30Min", "15Min"]
+    timeframe_priority_high_wins: true   # 4H zone beats a conflicting 15m zone
+    max_touches: 3                 # a zone touched more than this is considered used up
+
+  confirmation:
+    exhaustion_bars: 3             # 3 consecutive pushes into the zone...
+    exhaustion_require_declining_volume: true   # ...each on lower volume = exhaustion
+    flip_atr_mult: 1.0             # "step up and take control": > 1 ATR move...
+    flip_volume_mult: 1.5          # ...on > 1.5x average volume
+
+  exits:
+    stop_basis: invalidation       # primary: beyond the swing that invalidates the thesis
+    stop_atr_buffer: 0.25          # small ATR cushion beyond that swing
+    stop_atr_max_mult: 1.5         # cap: never risk more than 1.5x ATR per unit
+    target_basis: poc              # POC magnet first, then HVN, then opposing VA edge
+    min_reward_risk: 1.5
+
 universe:
   active_tier: starter           # starter | etf_core | equity_large | crypto

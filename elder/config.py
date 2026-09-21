@@ -67,6 +67,15 @@ class ScreeningConfig:
 
 
 @dataclass(frozen=True)
+class StrategyConfig:
+    context: dict[str, Any]
+    volume_profile: dict[str, Any]
+    zones: dict[str, Any]
+    confirmation: dict[str, Any]
+    exits: dict[str, Any]
+
+
+@dataclass(frozen=True)
 class Config:
     nominal_equity: float
     paper: bool
@@ -75,6 +84,7 @@ class Config:
     orderflow: OrderFlowConfig
     execution: ExecutionConfig
     screening: ScreeningConfig
+    strategy: StrategyConfig
     universe_tier: str
     raw: dict[str, Any] = field(repr=False, default_factory=dict)
 
@@ -116,6 +126,7 @@ def load(path: str | Path | None = None) -> Config:
         orderflow      = OrderFlowConfig(**raw["orderflow"]),
         execution      = ExecutionConfig(**raw["execution"]),
         screening      = ScreeningConfig(**raw["screening"]),
+        strategy       = StrategyConfig(**raw["strategy"]),
         universe_tier  = raw["universe"]["active_tier"],
         raw            = raw,
     )

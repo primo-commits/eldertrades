@@ -40,6 +40,8 @@ class Instrument:
 
 # ── Correlation buckets ──────────────────────────────────────────────────────
 BUCKETS = {
+    "intl_eu":     "European exposure via US-listed ETFs and ADRs",
+    "intl_jp":     "Japanese exposure via US-listed ETFs and ADRs",
     "index":       "Broad index beta (ES/NQ proxies)",
     "semis":       "Semiconductors",
     "megatech":    "Mega-cap technology",
@@ -49,7 +51,6 @@ BUCKETS = {
     "rates":       "Treasuries and credit",
     "biotech":     "Biotech and pharma",
     "highbeta":    "High-beta single names",
-    "crypto":      "Digital assets",
     "intl":        "International equity",
     "defensive":   "Staples, utilities, healthcare",
     "industrial":  "Industrials and materials",
@@ -102,8 +103,6 @@ ETF_CORE: list[Instrument] = [
     _i("EFA",  "equity", "intl",       3),
     _i("FXI",  "equity", "intl",       3, "Gaps hard on China headlines"),
     _i("EWZ",  "equity", "intl",       3),
-    _i("IBIT", "equity", "crypto",     2, "Spot BTC ETF -- shortable, unlike Alpaca crypto"),
-    _i("ETHA", "equity", "crypto",     3, "Spot ETH ETF"),
 ]
 
 # ── Tier 2: mega-cap equities, ADV > $1B ─────────────────────────────────────
@@ -162,16 +161,11 @@ EQUITY_LARGE: list[Instrument] = [
 # Excellent ATR for zone setups, but cap size and hard-skip earnings.
 EQUITY_HIGHBETA: list[Instrument] = [
     _i("PLTR", "equity", "highbeta", 2),
-    _i("COIN", "equity", "crypto",   2, "Crypto beta, shortable"),
-    _i("MSTR", "equity", "crypto",   2, "Extreme ATR; size way down"),
     _i("SMCI", "equity", "highbeta", 3),
     _i("HOOD", "equity", "financials", 3),
     _i("SOFI", "equity", "financials", 3),
     _i("AFRM", "equity", "highbeta", 3),
     _i("CVNA", "equity", "highbeta", 3),
-    _i("MARA", "equity", "crypto",   3),
-    _i("RIOT", "equity", "crypto",   3),
-    _i("CLSK", "equity", "crypto",   3),
     _i("IONQ", "equity", "highbeta", 3),
     _i("RKLB", "equity", "highbeta", 3),
     _i("ASTS", "equity", "highbeta", 3),
@@ -192,39 +186,72 @@ EQUITY_HIGHBETA: list[Instrument] = [
 LEVERAGED_EXCLUDED = ["TQQQ", "SQQQ", "SOXL", "SOXS", "TNA", "TZA",
                       "LABU", "LABD", "SPXU", "UVXY", "VIXY", "TSLL"]
 
-# ── Tier 5: Alpaca crypto ────────────────────────────────────────────────────
-# LONG ONLY (no shorting) and NO bracket orders. The bot manages these stops.
-CRYPTO: list[Instrument] = [
-    _i("BTC/USD",  "crypto", "crypto", 1),
-    _i("ETH/USD",  "crypto", "crypto", 1),
-    _i("SOL/USD",  "crypto", "crypto", 2),
-    _i("LINK/USD", "crypto", "crypto", 2),
-    _i("AVAX/USD", "crypto", "crypto", 3),
-    _i("LTC/USD",  "crypto", "crypto", 3),
-    _i("DOGE/USD", "crypto", "crypto", 3),
-    _i("XRP/USD",  "crypto", "crypto", 3),
-    _i("BCH/USD",  "crypto", "crypto", 3, "Thin on Alpaca"),
-    _i("DOT/USD",  "crypto", "crypto", 3, "Thin on Alpaca"),
-    _i("UNI/USD",  "crypto", "crypto", 3, "Thin on Alpaca"),
-    _i("AAVE/USD", "crypto", "crypto", 3, "Thin on Alpaca"),
+# ── Tier 4: international exposure via US-listed proxies ─────────────────────
+# Alpaca lists US securities only -- no TSE, LSE, Euronext or Xetra. These are
+# US-listed ETFs and ADRs that TRACK those markets and trade on NYSE/NASDAQ.
+#
+# SESSION WARNING, and it matters for this strategy specifically:
+#   Tokyo   09:00-15:00 JST = 20:00-02:00 ET -> ZERO overlap with NYSE hours
+#   London  08:00-16:30 GMT = 03:00-11:30 ET -> overlaps only 09:30-11:30 ET
+#   Europe  09:00-17:30 CET = 03:00-11:30 ET -> same two-hour window
+#
+# A Japan proxy traded during NYSE hours is priced off futures and NAV estimates
+# with its underlying market shut. Volume clusters at the open and the close,
+# which distorts the volume profile -- the core of Elder's context read. Europe
+# is better: the 09:30-11:30 ET overlap is genuine two-sided liquidity.
+INTL: list[Instrument] = [
+    # Europe -- tradeable in the 09:30-11:30 ET overlap
+    _i("FEZ",  "equity", "intl_eu", 2, "Euro Stoxx 50; closest thing to a EU index future"),
+    _i("VGK",  "equity", "intl_eu", 2, "FTSE Europe, broad"),
+    _i("EZU",  "equity", "intl_eu", 3, "Eurozone only"),
+    _i("HEDJ", "equity", "intl_eu", 3, "Currency-hedged Europe"),
+    _i("EWG",  "equity", "intl_eu", 3, "Germany / DAX proxy"),
+    _i("EWU",  "equity", "intl_eu", 3, "UK / FTSE proxy"),
+    _i("EWQ",  "equity", "intl_eu", 3, "France / CAC proxy"),
+    _i("EWL",  "equity", "intl_eu", 3, "Switzerland"),
+    # European ADRs -- deepest US-hours liquidity of the European names
+    _i("ASML", "equity", "intl_eu", 2, "ADR; semis overlap -- correlates with SMH"),
+    _i("SAP",  "equity", "intl_eu", 3, "ADR"),
+    _i("NVO",  "equity", "intl_eu", 3, "ADR; Denmark"),
+    _i("AZN",  "equity", "intl_eu", 3, "ADR; UK pharma"),
+    _i("SHEL", "equity", "intl_eu", 3, "ADR; correlates with XLE"),
+    _i("UL",   "equity", "intl_eu", 3, "ADR; defensive"),
+    _i("STLA", "equity", "intl_eu", 3, "ADR; high beta"),
+    _i("SPOT", "equity", "intl_eu", 3, "US-listed, Swedish; trades like a US growth name"),
+    # Japan -- underlying market CLOSED during NYSE hours
+    _i("EWJ",  "equity", "intl_jp", 3, "MSCI Japan; best JP volume but gappy intraday"),
+    _i("DXJ",  "equity", "intl_jp", 3, "Yen-hedged Japan; cleaner when USDJPY moves"),
+    _i("BBJP", "equity", "intl_jp", 3, "Broad Japan, thinner"),
+    _i("TM",   "equity", "intl_jp", 3, "Toyota ADR; most liquid JP single name"),
+    _i("SONY", "equity", "intl_jp", 3, "ADR; trades on US tech sentiment as much as Japan"),
+    _i("MUFG", "equity", "intl_jp", 3, "ADR; JP banks, rate-sensitive"),
+    _i("SMFG", "equity", "intl_jp", 3, "ADR; JP banks"),
+    _i("HMC",  "equity", "intl_jp", 3, "Honda ADR; thin"),
 ]
 
 # ── Recommended starting universe for a $1M book ─────────────────────────────
 STARTER_SYMBOLS = [
+    # SPY and QQQ lead: the direct ES/NQ analogues Elder actually trades.
     "SPY", "QQQ", "IWM", "SMH", "XLF", "XLE", "XLK", "XBI", "GDX", "TLT", "HYG", "SLV",
     "NVDA", "AAPL", "MSFT", "AMZN", "META", "TSLA", "AMD", "JPM",
-    "BTC/USD", "ETH/USD", "SOL/USD", "LINK/USD",
 ]
 
-ALL: list[Instrument] = ETF_CORE + EQUITY_LARGE + EQUITY_HIGHBETA + CRYPTO
+# Europe only, and only in the 09:30-11:30 ET overlap when the underlying market
+# is genuinely open. Japan is deliberately excluded -- see the INTL note.
+INTL_TRIAL_SYMBOLS = ["FEZ", "VGK", "ASML", "EWG", "EWU"]
+
+ALL: list[Instrument] = ETF_CORE + EQUITY_LARGE + EQUITY_HIGHBETA + INTL
 BY_SYMBOL: dict[str, Instrument] = {x.symbol: x for x in ALL}
 
 TIERS: dict[str, list[Instrument]] = {
     "etf_core":     ETF_CORE,
     "equity_large": EQUITY_LARGE,
     "equity_highbeta": EQUITY_HIGHBETA,
-    "crypto":       CRYPTO,
+    "intl":         INTL,
+    "intl_eu":      [x for x in INTL if x.bucket == "intl_eu"],
+    "intl_jp":      [x for x in INTL if x.bucket == "intl_jp"],
     "starter":      [BY_SYMBOL[s] for s in STARTER_SYMBOLS],
+    "intl_trial":   [BY_SYMBOL[s] for s in INTL_TRIAL_SYMBOLS],
 }
 
 
