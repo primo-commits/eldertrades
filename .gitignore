@@ -5,3 +5,5 @@ state/
 __pycache__/
 *.pyc
 .venv/
+dist_build/
+*.zip

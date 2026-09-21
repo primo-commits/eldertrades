@@ -1,0 +1,159 @@
+================================================================
+  ELDER TRADES  --  START HERE
+================================================================
+
+Everything is in this folder. Do these in order.
+
+
+  BEFORE YOU TOUCH THE COMPUTER: two things on Alpaca's website
+  --------------------------------------------------------------
+
+  Go to your Alpaca PAPER trading dashboard:
+  https://app.alpaca.markets/paper/dashboard/overview
+
+  A) RESET the account balance to  1000000
+
+     Why: the bot asks Alpaca how much money you have and sizes
+     trades off that answer. If Alpaca says 100,000 it will trade
+     like a 100,000 account no matter what any setting says.
+
+  B) TURN ON margin / short selling
+
+     Why: this strategy bets both ways. With shorting off, Alpaca
+     silently refuses every short trade and you only get half the
+     strategy without being told.
+
+
+  STEP 1  --  Double-click  1-INSTALL.bat
+  --------------------------------------------------------------
+  Installs what Python needs. Takes about a minute.
+  Wait for it to say DONE, then close the window.
+
+
+  STEP 2  --  Put your API key in
+  --------------------------------------------------------------
+  Open  alpaca_keys.txt  in Notepad (right-click > Open with >
+  Notepad). You will see:
+
+      ALPACA_API_KEY=PASTE_YOUR_PAPER_KEY_HERE
+      ALPACA_SECRET_KEY=PASTE_YOUR_PAPER_SECRET_HERE
+
+  Replace both placeholder bits with your real PAPER key and
+  secret. Keep the part before the = sign exactly as it is.
+  Save and close.
+
+  Make sure it is your PAPER key, not a live one.
+
+
+  STEP 3  --  Double-click  2-CHECK.bat
+  --------------------------------------------------------------
+  This checks about 20 things that could break tomorrow.
+
+  You want to see:     PREFLIGHT PASSED
+
+  "PASSED with N warnings" is fine too. You will always get two
+  warnings about "iex" - that just means you are on Alpaca's free
+  data. Expected.
+
+  If it says FAILED, scroll up, find the lines marked [FAIL], and
+  fix what they tell you. Run it again. Do not go further until
+  it passes.
+
+
+  ================  TOMORROW MORNING  ================
+
+  Market opens 9:30 AM Eastern.
+
+
+  STEP 4  --  Around 9:00 AM, double-click  2-CHECK.bat  again
+  --------------------------------------------------------------
+  Things change overnight. Takes 30 seconds.
+
+
+  STEP 5  --  At 9:30, double-click  3-PRACTICE.bat
+  --------------------------------------------------------------
+  Practice mode. It watches and thinks but places NOTHING.
+
+  Leave it running 30-60 minutes. You are looking for:
+    - data coming in for the symbols
+    - [reconcile] lines appearing every 30 seconds
+    - no red ERROR lines
+
+  Press Ctrl-C ONCE to stop it.
+
+
+  STEP 6  --  If that looked healthy, double-click  4-LIVE.bat
+  --------------------------------------------------------------
+  It will ask you to type YES to confirm.
+
+  Now it places real orders on your PAPER account.
+  Fake money. Nothing real is at risk.
+
+  Press Ctrl-C ONCE to stop. Just once, then wait a few seconds.
+  Do not close the window - you lose the final report.
+
+
+  ================  AFTER THE SESSION  ================
+
+  Two folders appear:
+
+     journal\setups_*.csv       trades it TOOK
+     journal\rejections_*.csv   trades it SKIPPED, and why
+
+  Open rejections in Excel. Look at the "stage" column.
+
+     mostly "context"        no clear trend today. Normal.
+     mostly "location"       trend existed, price never reached
+                             a good level. Normal.
+     mostly "confirmation"   reached good levels, trigger never
+                             fired. If this is EVERY row all day,
+                             the trigger is too strict - send it
+                             to me and I will loosen it.
+     mostly "exits"          setups formed but did not pay enough
+     mostly "risk"           safety limits stopped it
+
+  Send me both CSV files and I will tell you what to adjust.
+
+
+  ================  IMPORTANT  ================
+
+  IT MAY TAKE ZERO TRADES TOMORROW. THAT IS NOT A BUG.
+
+  Three separate conditions have to line up, and the rule is
+  "if the move is not obvious, stay away." A quiet day produces
+  nothing. That is the strategy working.
+
+  Tomorrow proves the plumbing works - that it connects, reads
+  data, sizes correctly, places orders and cleans up after
+  itself. It does NOT tell us whether the strategy makes money.
+  That needs the backtester, which is the next job.
+
+  Do not change any settings on day one. One day is not enough
+  to tune on, and it is easy to accidentally tune to noise.
+
+
+  ================  IF SOMETHING BREAKS  ================
+
+  "python is not recognized"
+      Python is not installed or not on your PATH.
+      Get it from python.org and tick "Add Python to PATH".
+
+  Preflight says credentials not found
+      alpaca_keys.txt is not saved in THIS folder, or still has
+      the placeholder text in it.
+
+  Every short trade rejected
+      Shorting is not enabled on the paper account. See (B) above.
+
+  "RISK ENGINE IS HALTED"
+      Open state\risk_state.json to see why. Fix it, then delete
+      that file to clear the halt.
+
+  A position will not close
+      The bot retries automatically. If the log says MANUAL
+      INTERVENTION REQUIRED, close it yourself in the Alpaca
+      dashboard.
+
+
+  More detail is in RUNBOOK.md and README.md.
+================================================================
