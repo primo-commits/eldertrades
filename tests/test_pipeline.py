@@ -73,10 +73,11 @@ def build_bullish_case():
     px += [101.20, 101.05, 100.90]
     vol += [9_000.0, 7_000.0, 5_000.0]
 
-    # One decisive buy bar -> flip. Sized ~1.5x ATR: enough to clear the flip
-    # threshold, not so much that price ends up chasing far from the zone.
-    px += [101.55]
-    vol += [36_000.0]
+    # The flip, now evaluated over flip_window_bars (3). Buyers take control
+    # across three bars rather than one outsized candle -- which is both what
+    # Elder describes and what the single-bar encoding was throwing away.
+    px += [101.15, 101.35, 101.55]
+    vol += [30_000.0, 33_000.0, 36_000.0]
 
     ex = bars_from(px, freq="5min", volumes=vol)
     agg = {"open": "first", "high": "max", "low": "min", "close": "last", "volume": "sum"}

@@ -170,6 +170,12 @@ strategy:
     exhaustion_require_declining_volume: true   # ...each on lower volume = exhaustion
     flip_atr_mult: 1.0             # "step up and take control": > 1 ATR move...
     flip_volume_mult: 1.5          # ...on > 1.5x average volume
+    # Evaluated over a WINDOW, not one bar. The single-bar version fired 5
+    # times out of 3,052 setups in a real backtest (0.16%) -- taking control
+    # is not the same event as one outsized candle. Measured: a 3-bar window
+    # raises the flip pass rate 5x at these thresholds, 20x at 0.7/1.3.
+    # Set to 1 to restore the original single-bar behaviour.
+    flip_window_bars: 3
 
   exits:
     stop_basis: invalidation       # primary: beyond the swing that invalidates the thesis

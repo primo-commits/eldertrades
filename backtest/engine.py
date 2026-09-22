@@ -279,7 +279,8 @@ def run(bars_by_symbol: dict[str, pd.DataFrame], cfg, *,
                             exhaustion_bars=s.confirmation["exhaustion_bars"],
                             require_declining_volume=s.confirmation["exhaustion_require_declining_volume"],
                             flip_atr_mult=s.confirmation["flip_atr_mult"],
-                            flip_volume_mult=s.confirmation["flip_volume_mult"])
+                            flip_volume_mult=s.confirmation["flip_volume_mult"],
+                            flip_window_bars=s.confirmation.get("flip_window_bars", 3))
                 if not c.confirmed:
                     skipped["no confirmation"] = skipped.get("no confirmation", 0) + 1
                     continue

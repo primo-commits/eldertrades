@@ -103,9 +103,10 @@ SWEEP_GRIDS = {
         "context.require_poc_alignment": [True, False],
     },
     "confirmation": {
-        "confirmation.flip_atr_mult": [0.5, 0.7, 1.0, 1.3],
+        "confirmation.flip_window_bars": [1, 2, 3, 4],
+        "confirmation.flip_atr_mult": [0.6, 0.8, 1.0],
         "confirmation.flip_volume_mult": [1.2, 1.5],
-        "confirmation.exhaustion_bars": [2, 3, 4],
+        "confirmation.exhaustion_bars": [2, 3],
         "confirmation.exhaustion_require_declining_volume": [True, False],
     },
     "location": {

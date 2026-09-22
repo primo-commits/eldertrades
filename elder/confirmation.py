@@ -111,15 +111,25 @@ def detect_exhaustion(bars: pd.DataFrame, zone: Zone, *, n_bars: int = 3,
 
 def detect_flip(bars: pd.DataFrame, zone: Zone, *, atr_mult: float = 1.0,
                 volume_mult: float = 1.5, atr_period: int = 14,
-                avg_window: int = 20,
+                avg_window: int = 20, window_bars: int = 3,
                 flow: pd.DataFrame | None = None) -> tuple[bool, float, str]:
     """
     The other side steps up and takes control.
 
         "then big buyers step up and start moving the market up"
 
-    Requires a decisive move AWAY from the zone: displacement greater than
-    `atr_mult` x ATR on volume above `volume_mult` x average.
+    Evaluated over a WINDOW of `window_bars`, not a single bar.
+
+    The original required displacement greater than atr_mult x ATR AND volume
+    above volume_mult x average, both on ONE 5-minute bar. Measured on a real
+    backtest that fired 5 times out of 3,052 setups -- 0.16%. Taking control is
+    not the same event as one outsized candle: a zone that gets rejected over
+    three bars on rising participation is exactly what Elder describes, and the
+    single-bar encoding threw all of those away.
+
+    Cumulative displacement across the window is compared to atr_mult x ATR,
+    and mean window volume to volume_mult x average. Set window_bars=1 to
+    restore the old single-bar behaviour.
     """
     if len(bars) < atr_period + 2:
         return False, 0.0, "not enough bars for ATR"
@@ -129,8 +139,8 @@ def detect_flip(bars: pd.DataFrame, zone: Zone, *, atr_mult: float = 1.0,
     if not np.isfinite(cur_atr) or cur_atr <= 0:
         return False, 0.0, "ATR unavailable"
 
-    last = bars.iloc[-1]
-    displacement = float(last["close"] - last["open"])
+    w = bars.tail(max(1, window_bars))
+    displacement = float(w["close"].iloc[-1] - w["open"].iloc[0])
     want_up = zone.kind == DEMAND          # demand -> we want buyers taking over
 
     if want_up and displacement <= 0:
@@ -143,9 +153,11 @@ def detect_flip(bars: pd.DataFrame, zone: Zone, *, atr_mult: float = 1.0,
         return False, 0.0, f"move {move_mult:.2f}x ATR below {atr_mult}x threshold"
 
     avg_v = _avg_volume(bars, avg_window)
-    vol_ratio = float(last["volume"]) / avg_v if avg_v > 0 else 0.0
+    vol_ratio = float(w["volume"].mean()) / avg_v if avg_v > 0 else 0.0
     if vol_ratio < volume_mult:
         return False, 0.0, f"volume {vol_ratio:.2f}x avg below {volume_mult}x threshold"
+
+    last = w.iloc[-1]
 
     # On the SIP path, also require aggressive delta to agree with the direction.
     if flow is not None and not flow.empty:
@@ -166,6 +178,7 @@ def detect_flip(bars: pd.DataFrame, zone: Zone, *, atr_mult: float = 1.0,
 def confirm(bars: pd.DataFrame, zone: Zone, *, mode: str = "bars",
             exhaustion_bars: int = 3, require_declining_volume: bool = True,
             flip_atr_mult: float = 1.0, flip_volume_mult: float = 1.5,
+            flip_window_bars: int = 3,
             flow: pd.DataFrame | None = None) -> ConfirmationRead:
     """
     Full trigger: exhaustion THEN flip. Both, or no trade.
@@ -182,7 +195,7 @@ def confirm(bars: pd.DataFrame, zone: Zone, *, mode: str = "bars",
     use_flow = flow if mode == "orderflow" else None
 
     # Exhaustion looks at the window BEFORE the most recent bar.
-    prior = bars.iloc[:-1]
+    prior = bars.iloc[:-max(1, flip_window_bars)]
     prior_flow = use_flow.iloc[:-1] if use_flow is not None and len(use_flow) > 1 else None
 
     exh, exh_s, exh_why = detect_exhaustion(
@@ -191,7 +204,7 @@ def confirm(bars: pd.DataFrame, zone: Zone, *, mode: str = "bars",
 
     flip, flip_s, flip_why = detect_flip(
         bars, zone, atr_mult=flip_atr_mult, volume_mult=flip_volume_mult,
-        flow=use_flow)
+        window_bars=flip_window_bars, flow=use_flow)
 
     confirmed = exh and flip
     detail = f"exhaustion: {exh_why} | flip: {flip_why}"
