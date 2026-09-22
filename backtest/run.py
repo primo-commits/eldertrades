@@ -139,9 +139,10 @@ SWEEP_GRIDS = {
     # sessions runs about 80 seconds, so a 96-combination grid is two hours.
     # These land in the 30-45 minute range.
     "confirmation": {
-        "confirmation.flip_window_bars": [1, 2, 3, 4],
-        "confirmation.flip_atr_mult": [0.6, 0.8, 1.0],
-        "confirmation.exhaustion_require_declining_volume": [True, False],
+        "confirmation.exhaustion_mode": ["fading", "strict"],
+        "confirmation.flip_window_bars": [1, 3],
+        "confirmation.flip_atr_mult": [0.5, 0.7, 1.0],
+        "confirmation.flip_volume_mult": [1.1, 1.3],
     },
     "location": {
         "zones.max_distance_atr": [2.0, 3.0, 3.5, 4.0, 5.0],

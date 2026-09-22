@@ -278,6 +278,7 @@ def run(bars_by_symbol: dict[str, pd.DataFrame], cfg, *,
                 c = confirm(m5, zone, mode=s.confirmation.get("mode", "bars"),
                             exhaustion_bars=s.confirmation["exhaustion_bars"],
                             require_declining_volume=s.confirmation["exhaustion_require_declining_volume"],
+                            exhaustion_mode=s.confirmation.get("exhaustion_mode", "fading"),
                             flip_atr_mult=s.confirmation["flip_atr_mult"],
                             flip_volume_mult=s.confirmation["flip_volume_mult"],
                             flip_window_bars=s.confirmation.get("flip_window_bars", 3))

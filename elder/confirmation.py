@@ -57,6 +57,7 @@ def _avg_volume(bars: pd.DataFrame, window: int = 20) -> float:
 
 def detect_exhaustion(bars: pd.DataFrame, zone: Zone, *, n_bars: int = 3,
                       require_declining_volume: bool = True,
+                      mode: str = "fading",
                       flow: pd.DataFrame | None = None) -> tuple[bool, float, str]:
     """
     The side pushing into the zone is running out.
@@ -67,9 +68,24 @@ def detect_exhaustion(bars: pd.DataFrame, zone: Zone, *, n_bars: int = 3,
 
         "we see the market push up higher and higher and higher and we see the
          aggressive buyers getting smaller and smaller and smaller"
+
+    mode="strict"  every bar makes a higher high AND volume falls every bar.
+                   A perfect monotonic staircase. Measured end to end on a real
+                   walk-forward: the full confirmation passed 5 times out of
+                   3,052 setups, and once the flip moved to a window it passed
+                   ZERO times out of 6,099. One bar that fails to extend, or a
+                   single volume uptick, resets the whole sequence.
+
+    mode="fading"  (default) price is still PRESSING the zone -- the latest
+                   extreme sits near the window's extreme -- and participation
+                   is FADING: mean volume over the later half of the window is
+                   below the earlier half. Same idea, no staircase requirement.
     """
     if len(bars) < n_bars + 1:
         return False, 0.0, "not enough bars"
+
+    if mode == "fading":
+        return _exhaustion_fading(bars, zone, n_bars, require_declining_volume, flow)
 
     recent = bars.tail(n_bars)
     pushing_up = zone.kind == SUPPLY
@@ -107,6 +123,37 @@ def detect_exhaustion(bars: pd.DataFrame, zone: Zone, *, n_bars: int = 3,
     return True, round(strength, 3), (
         f"{direction} exhausting: {n_bars} pushes, {label} -{decay:.0%}"
     )
+
+
+def _exhaustion_fading(bars: pd.DataFrame, zone: Zone, n_bars: int,
+                       require_declining_volume: bool,
+                       flow: pd.DataFrame | None) -> tuple[bool, float, str]:
+    """Non-monotonic exhaustion: still pressing, participation fading."""
+    w = bars.tail(max(n_bars * 2, 4))
+    pushing_up = zone.kind == SUPPLY
+    direction = "buyers" if pushing_up else "sellers"
+
+    # Still pressing the zone: the latest extreme is at or near the window's.
+    if pushing_up:
+        extreme, latest = float(w["high"].max()), float(w["high"].tail(2).max())
+    else:
+        extreme, latest = float(w["low"].min()), float(w["low"].tail(2).min())
+    span = float(w["high"].max() - w["low"].min())
+    if span <= 0:
+        return False, 0.0, "flat window"
+    pressing = abs(latest - extreme) <= span * 0.25
+    if not pressing:
+        return False, 0.0, f"{direction} no longer pressing the zone"
+
+    half = max(1, len(w) // 2)
+    early, late = float(w["volume"].head(half).mean()), float(w["volume"].tail(half).mean())
+    if require_declining_volume and not (late < early):
+        return False, 0.0, f"participation not fading ({late/early:.2f}x)"
+
+    decay = (early - late) / early if early > 0 else 0.0
+    return True, round(float(np.clip(decay, 0.0, 1.0)), 3), (
+        f"{direction} fading: volume {decay:+.0%} over {len(w)} bars while "
+        f"still pressing")
 
 
 def detect_flip(bars: pd.DataFrame, zone: Zone, *, atr_mult: float = 1.0,
@@ -177,6 +224,7 @@ def detect_flip(bars: pd.DataFrame, zone: Zone, *, atr_mult: float = 1.0,
 
 def confirm(bars: pd.DataFrame, zone: Zone, *, mode: str = "bars",
             exhaustion_bars: int = 3, require_declining_volume: bool = True,
+            exhaustion_mode: str = "fading",
             flip_atr_mult: float = 1.0, flip_volume_mult: float = 1.5,
             flip_window_bars: int = 3,
             flow: pd.DataFrame | None = None) -> ConfirmationRead:
@@ -199,7 +247,7 @@ def confirm(bars: pd.DataFrame, zone: Zone, *, mode: str = "bars",
     prior_flow = use_flow.iloc[:-1] if use_flow is not None and len(use_flow) > 1 else None
 
     exh, exh_s, exh_why = detect_exhaustion(
-        prior, zone, n_bars=exhaustion_bars,
+        prior, zone, n_bars=exhaustion_bars, mode=exhaustion_mode,
         require_declining_volume=require_declining_volume, flow=prior_flow)
 
     flip, flip_s, flip_why = detect_flip(
