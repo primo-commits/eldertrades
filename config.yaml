@@ -152,8 +152,21 @@ strategy:
     timeframe_priority_high_wins: true   # 4H zone beats a conflicting 15m zone
     # How close price must be to a zone edge to engage, in ATR rather than a
     # fixed percent -- a 1% band means something different on SPY than on TSLA.
-    # Must allow for the flip bar having already moved ~1 ATR off the zone.
-    max_distance_atr: 2.0
+    # Must allow for the flip window having already moved price off the zone.
+    #
+    # Raised 2.0 -> 3.5 on 2026-09-22 to roughly double the pass rate. The real
+    # backtest measured 6.5% at 2.0; the measured distance curve gives:
+    #     2.0 -> 6.5%   3.0 -> 10.7%   3.5 -> ~13%   4.0 -> 15.1%
+    #
+    # COST, stated plainly: at 3.5 ATR from the zone you are entering well
+    # after the level that justified the trade. Elder's method is entering AT
+    # the zone -- that is where the institutional fills sit and where
+    # invalidation is tightest. This does not widen the stop (the stop comes
+    # from the interaction window, not the zone) but it does mean giving up
+    # part of the move and weakening the reason the setup existed. Whether the
+    # extra trades pay is a P&L question -- max_distance_atr is in the
+    # location sweep so the backtest can settle it.
+    max_distance_atr: 3.5
     max_touches: 3                 # a zone touched more than this is considered used up
     # Zones expire, counted in bars of their OWN timeframe. Without this a
     # level drawn weeks ago survives forever if price never closed through it:

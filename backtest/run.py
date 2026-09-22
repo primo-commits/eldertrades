@@ -111,7 +111,7 @@ SWEEP_GRIDS = {
     },
     "location": {
         "zones.expansion_atr_mult": [1.5, 2.0, 2.5],
-        "zones.max_distance_atr": [1.5, 2.0, 3.0],
+        "zones.max_distance_atr": [2.0, 3.0, 3.5, 4.0, 5.0],
         "zones.max_age_bars": [100, 200, 400],
     },
     "exits": {
