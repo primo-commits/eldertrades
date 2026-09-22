@@ -85,12 +85,40 @@ def _with(cfg, **over):
     return c
 
 
-SWEEP_GRID = {
-    "confirmation.flip_atr_mult": [0.6, 0.8, 1.0, 1.3],
-    "confirmation.exhaustion_bars": [2, 3, 4],
-    "zones.expansion_atr_mult": [1.5, 2.0, 2.5],
-    "exits.min_reward_risk": [1.2, 1.5, 2.0],
+# Focused grids. A single combined grid explodes combinatorially and takes
+# hours, so sweeps are scoped to the stage you are actually questioning.
+#
+# "context" exists because the live sessions and the first backtests all
+# bottlenecked at the structure read. Measured on synthetic 4H series, the
+# current setting catches only ~35% of clear trends while flagging 17% of
+# random walks -- the best signal-to-noise of the variants tried, but the
+# lowest recall. Whether trading the extra setups pays is a P&L question, so
+# it belongs in a sweep rather than in a judgement call.
+SWEEP_GRIDS = {
+    "context": {
+        "context.bullish_higher_highs": [2, 3],
+        "context.bullish_higher_lows": [2],
+        "context.equal_level_tolerance": [0.002, 0.003, 0.005],
+        "context.swing_bars": [2, 3],
+        "context.require_poc_alignment": [True, False],
+    },
+    "confirmation": {
+        "confirmation.flip_atr_mult": [0.5, 0.7, 1.0, 1.3],
+        "confirmation.flip_volume_mult": [1.2, 1.5],
+        "confirmation.exhaustion_bars": [2, 3, 4],
+        "confirmation.exhaustion_require_declining_volume": [True, False],
+    },
+    "location": {
+        "zones.expansion_atr_mult": [1.5, 2.0, 2.5],
+        "zones.max_distance_atr": [1.5, 2.0, 3.0],
+        "zones.max_age_bars": [100, 200, 400],
+    },
+    "exits": {
+        "exits.min_reward_risk": [1.2, 1.5, 2.0],
+        "exits.stop_atr_max_mult": [2.0, 2.5, 3.0],
+    },
 }
+SWEEP_GRID = SWEEP_GRIDS["confirmation"]
 
 
 def main(argv=None) -> int:
@@ -105,7 +133,9 @@ def main(argv=None) -> int:
     p.add_argument("--walk-forward", action="store_true")
     p.add_argument("--train", type=int, default=60)
     p.add_argument("--test", type=int, default=20)
-    p.add_argument("--sweep", action="store_true")
+    p.add_argument("--sweep", nargs="?", const="confirmation", default=None,
+                   choices=list(SWEEP_GRIDS),
+                   help="sweep one stage: context | confirmation | location | exits")
     p.add_argument("-v", "--verbose", action="store_true")
     a = p.parse_args(argv)
     logging.basicConfig(level=logging.DEBUG if a.verbose else logging.WARNING)
@@ -123,7 +153,7 @@ def main(argv=None) -> int:
     OUT.mkdir(exist_ok=True)
 
     if a.sweep:
-        return _sweep(cfg, data, equity, a)
+        return _sweep(cfg, data, equity, a, SWEEP_GRIDS[a.sweep], a.sweep)
     if a.walk_forward:
         return _walk_forward(cfg, data, equity, a)
 
@@ -197,11 +227,14 @@ def _walk_forward(cfg, data, equity, a) -> int:
     return 0
 
 
-def _sweep(cfg, data, equity, a) -> int:
-    keys = list(SWEEP_GRID)
-    combos = list(itertools.product(*(SWEEP_GRID[k] for k in keys)))
-    print(f"\nSWEEP: {len(combos)} combinations, identical seed per run "
-          f"so they are comparable\n")
+def _sweep(cfg, data, equity, a, grid: dict, name: str) -> int:
+    keys = list(grid)
+    combos = list(itertools.product(*(grid[k] for k in keys)))
+    print(f"\nSWEEP [{name}]: {len(combos)} combinations, identical seed per "
+          f"run so they are comparable\n")
+    for k in keys:
+        print(f"    {k}: {grid[k]}")
+    print()
     rows = []
     for n, combo in enumerate(combos, 1):
         over = dict(zip(keys, combo))
@@ -211,14 +244,17 @@ def _sweep(cfg, data, equity, a) -> int:
         rows.append({**over, "trades": m.trades, "win_rate": m.win_rate,
                      "net": m.net, "profit_factor": m.profit_factor,
                      "expectancy": m.expectancy, "max_dd_pct": m.max_drawdown_pct,
-                     "sharpe": m.sharpe})
+                     "sharpe": m.sharpe,
+                     "no_bias": r.skipped.get("no_bias", 0),
+                     "not_at_zone": r.skipped.get("not at a zone", 0),
+                     "no_confirmation": r.skipped.get("no confirmation", 0)})
         if n % 10 == 0:
             print(f"  {n}/{len(combos)}")
-    df = pd.DataFrame(rows).sort_values("expectancy", ascending=False)
-    df.to_csv(OUT / "sweep.csv", index=False)
+    df = pd.DataFrame(rows).sort_values(["net", "trades"], ascending=False)
+    df.to_csv(OUT / f"sweep_{name}.csv", index=False)
     print("\nTOP 10 BY EXPECTANCY (in-sample -- see the warning below)")
     print(df.head(10).to_string(index=False))
-    print(f"\n  saved -> {OUT / 'sweep.csv'}")
+    print(f"\n  saved -> {OUT / f'sweep_{name}.csv'}")
     print("\n  WARNING: these are IN-SAMPLE. The best row here is the one that")
     print("  fits this period's noise most closely. Re-run the winner under")
     print("  --walk-forward before trusting it.")

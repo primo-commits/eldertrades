@@ -131,7 +131,8 @@ Tuning is in `config.yaml` under `reconcile`. Tests: `python -m tests.test_recon
 python -m backtest.run --synthetic                 # engine self-test, no keys
 python -m backtest.run --days 180                  # in-sample single pass
 python -m backtest.run --walk-forward --days 365   # OUT-OF-SAMPLE -- the real answer
-python -m backtest.run --sweep --days 180          # parameter grid (in-sample)
+python -m backtest.run --sweep context --days 180  # is the 4H bias too strict?
+python -m backtest.run --sweep confirmation        # is the trigger too strict?
 ```
 
 Or `6-BACKTEST.bat` on Windows.
