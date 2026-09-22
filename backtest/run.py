@@ -162,7 +162,16 @@ def main(argv=None) -> int:
     m = metrics.compute(r.trades, r.equity_curve, equity)
     print()
     print(metrics.report(m, "IN-SAMPLE (single pass -- NOT out of sample)"))
-    print(f"\n  why nothing fired: {dict(sorted(r.skipped.items(), key=lambda x: -x[1])[:8])}")
+    tot = sum(v for k, v in r.skipped.items() if "warm-up" not in k)
+    print("\n  WHY NOTHING FIRED:")
+    for k, v in sorted(r.skipped.items(), key=lambda x: -x[1])[:12]:
+        share = f"{v / tot:>5.0%}" if tot and "warm-up" not in k else "     "
+        print(f"    {k:<32} {v:>9,}  {share}")
+    pd.DataFrame([{"reason": k, "count": v,
+                   "share": round(v / tot, 4) if tot and "warm-up" not in k else None}
+                  for k, v in sorted(r.skipped.items(), key=lambda x: -x[1])]
+                 ).to_csv(OUT / "why_nothing_fired.csv", index=False)
+    print(f"  saved -> {OUT / 'why_nothing_fired.csv'}")
     _save(r, "single")
     if m.trades:
         print("\n  NOTE: a single pass over all data is in-sample. Use")
@@ -185,7 +194,7 @@ def _walk_forward(cfg, data, equity, a) -> int:
     # timeframe, so a bare 20-session window can never produce context.
     warmup = dt.timedelta(days=cfg.data.lookback_days)
 
-    results, rows = [], []
+    results, rows, skip_rows = [], [], []
     agg_skip: dict[str, int] = {}
     for i, w in enumerate(windows, 1):
         lo = w.test_start - warmup
@@ -199,6 +208,8 @@ def _walk_forward(cfg, data, equity, a) -> int:
                        trade_from=w.test_start)
         for k, v in r.skipped.items():
             agg_skip[k] = agg_skip.get(k, 0) + v
+        skip_rows.append({"window": i, "test_start": w.test_start,
+                          "test_end": w.test_end, **r.skipped})
         m = metrics.compute(r.trades, r.equity_curve, equity)
         results.append(r)
         rows.append({"window": i, "test_start": w.test_start, "test_end": w.test_end,
@@ -215,9 +226,19 @@ def _walk_forward(cfg, data, equity, a) -> int:
     print(metrics.report(m, "OUT-OF-SAMPLE (all test windows combined)"))
     print("\n  WHY NOTHING FIRED (aggregated across every window):")
     tot = sum(v for k, v in agg_skip.items() if "warm-up" not in k)
-    for k, v in sorted(agg_skip.items(), key=lambda x: -x[1])[:10]:
+    for k, v in sorted(agg_skip.items(), key=lambda x: -x[1])[:12]:
         share = f"{v / tot:>5.0%}" if tot and "warm-up" not in k else "     "
         print(f"    {k:<32} {v:>9,}  {share}")
+
+    # Persisted, because this block is the most useful output of the whole run
+    # and previously existed only in terminal scrollback.
+    pd.DataFrame([{"reason": k, "count": v,
+                   "share": round(v / tot, 4) if tot and "warm-up" not in k else None}
+                  for k, v in sorted(agg_skip.items(), key=lambda x: -x[1])]
+                 ).to_csv(OUT / "why_nothing_fired.csv", index=False)
+    pd.DataFrame(skip_rows).fillna(0).to_csv(OUT / "skip_by_window.csv", index=False)
+    print(f"\n  saved -> {OUT / 'why_nothing_fired.csv'}")
+    print(f"  saved -> {OUT / 'skip_by_window.csv'}")
     df = pd.DataFrame(rows)
     df.to_csv(OUT / "walk_forward.csv", index=False)
     if len(df):
