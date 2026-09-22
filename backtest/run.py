@@ -14,6 +14,7 @@ import datetime as dt
 import itertools
 import logging
 import sys
+import time
 from pathlib import Path
 
 import numpy as np
@@ -29,13 +30,46 @@ log = logging.getLogger("backtest")
 OUT = Path("backtest_results")
 
 
+class _Tee:
+    """
+    Duplicate stdout to a log file, unbuffered.
+
+    Previously 6-BACKTEST.bat piped through PowerShell Tee-Object, which
+    BUFFERS: a long run printed nothing until it finished, so it looked frozen.
+    Doing it here keeps output live and works the same on every platform.
+    """
+
+    def __init__(self, path: Path):
+        path.parent.mkdir(parents=True, exist_ok=True)
+        self.file = path.open("w", encoding="utf-8", buffering=1)
+        self.stdout = sys.stdout
+
+    def write(self, data):
+        self.stdout.write(data)
+        self.stdout.flush()
+        self.file.write(data)
+        self.file.flush()
+        return len(data)
+
+    def flush(self):
+        self.stdout.flush()
+        self.file.flush()
+
+    def close(self):
+        try:
+            self.file.close()
+        except Exception:
+            pass
+
+
 def fetch(cfg, symbols: list[str], days: int) -> dict[str, pd.DataFrame]:
     md = MarketData(feed=cfg.data.feed, session_tz=cfg.data.session_tz,
                     prefer=cfg.prefer_credentials)
     end = dt.datetime.now(dt.timezone.utc)
     start = end - dt.timedelta(days=days)
     print(f"fetching {cfg.data.base_timeframe} bars for {len(symbols)} symbols, "
-          f"{days} days ({cfg.data.feed} feed)...")
+          f"{days} days ({cfg.data.feed} feed)... this can take a minute",
+          flush=True)
     raw = md.bars(symbols, cfg.data.base_timeframe, start=start, end=end)
     out = {}
     for s, df in raw.items():
@@ -97,22 +131,21 @@ def _with(cfg, **over):
 SWEEP_GRIDS = {
     "context": {
         "context.bullish_higher_highs": [2, 3],
-        "context.bullish_higher_lows": [2],
-        "context.equal_level_tolerance": [0.002, 0.003, 0.005],
+        "context.equal_level_tolerance": [0.002, 0.005],
         "context.swing_bars": [2, 3],
         "context.require_poc_alignment": [True, False],
     },
+    # Grids are kept small on purpose. One engine pass over 20 symbols and 180
+    # sessions runs about 80 seconds, so a 96-combination grid is two hours.
+    # These land in the 30-45 minute range.
     "confirmation": {
         "confirmation.flip_window_bars": [1, 2, 3, 4],
         "confirmation.flip_atr_mult": [0.6, 0.8, 1.0],
-        "confirmation.flip_volume_mult": [1.2, 1.5],
-        "confirmation.exhaustion_bars": [2, 3],
         "confirmation.exhaustion_require_declining_volume": [True, False],
     },
     "location": {
-        "zones.expansion_atr_mult": [1.5, 2.0, 2.5],
         "zones.max_distance_atr": [2.0, 3.0, 3.5, 4.0, 5.0],
-        "zones.max_age_bars": [100, 200, 400],
+        "zones.expansion_atr_mult": [1.5, 2.0, 2.5],
     },
     "exits": {
         "exits.min_reward_risk": [1.2, 1.5, 2.0],
@@ -140,6 +173,11 @@ def main(argv=None) -> int:
     p.add_argument("-v", "--verbose", action="store_true")
     a = p.parse_args(argv)
     logging.basicConfig(level=logging.DEBUG if a.verbose else logging.WARNING)
+
+    OUT.mkdir(exist_ok=True)
+    tee = _Tee(OUT / f"console_{dt.datetime.now():%Y-%m-%d_%H%M}.log")
+    sys.stdout = tee
+    print(f"logging this run to {tee.file.name}\n", flush=True)
 
     cfg = cfgmod.load()
     equity = a.equity or cfg.nominal_equity
@@ -188,7 +226,10 @@ def _walk_forward(cfg, data, equity, a) -> int:
         print(f"not enough sessions ({len(sessions)}) for train={a.train} test={a.test}")
         return 1
     print(f"\nWALK-FORWARD: {len(windows)} windows, "
-          f"train {a.train}d / test {a.test}d, over {len(sessions)} sessions\n")
+          f"train {a.train}d / test {a.test}d, over {len(sessions)} sessions")
+    print(f"  {len(data)} symbols, {cfg.data.lookback_days}d warm-up per window. "
+          f"This takes a while -- progress prints per window.\n", flush=True)
+    t0 = time.time()
 
     # Each window needs PRECEDING history or it starts cold. The 4H bias needs
     # ~14 sessions before a pivot confirms and find_zones needs 26 bars per
@@ -217,9 +258,11 @@ def _walk_forward(cfg, data, equity, a) -> int:
                      "trades": m.trades, "win_rate": m.win_rate,
                      "net": m.net, "return_pct": m.return_pct,
                      "profit_factor": m.profit_factor, "max_dd_pct": m.max_drawdown_pct})
-        print(f"  win {i:>2}  {w.test_start} -> {w.test_end}  "
+        el = time.time() - t0
+        print(f"  win {i:>2}/{len(windows)}  {w.test_start} -> {w.test_end}  "
               f"trades {m.trades:>4}  wr {m.win_rate:>6.1%}  net ${m.net:>10,.0f}  "
-              f"PF {m.profit_factor:>5.2f}")
+              f"PF {m.profit_factor:>5.2f}   [{el/60:.1f}m elapsed, "
+              f"eta {el/i*(len(windows)-i)/60:.1f}m]", flush=True)
 
     trades, eq = metrics.combine(results)
     m = metrics.compute(trades, eq, equity)
@@ -252,17 +295,26 @@ def _walk_forward(cfg, data, equity, a) -> int:
 def _sweep(cfg, data, equity, a, grid: dict, name: str) -> int:
     keys = list(grid)
     combos = list(itertools.product(*(grid[k] for k in keys)))
+    est = len(combos) * len(data) * 4.0 / 60          # ~4s per symbol per pass
     print(f"\nSWEEP [{name}]: {len(combos)} combinations, identical seed per "
-          f"run so they are comparable\n")
+          f"run so they are comparable")
+    print(f"  rough estimate: {est:.0f} minutes. Progress prints per "
+          f"combination.\n", flush=True)
     for k in keys:
         print(f"    {k}: {grid[k]}")
     print()
     rows = []
+    t0 = time.time()
     for n, combo in enumerate(combos, 1):
         over = dict(zip(keys, combo))
         r = engine.run(data, _with(cfg, **over), starting_equity=equity,
                        rescan_bars=a.rescan_bars, seed=a.seed)
         m = metrics.compute(r.trades, r.equity_curve, equity)
+        el = time.time() - t0
+        eta = el / n * (len(combos) - n)
+        print(f"  [{n:>3}/{len(combos)}] {str(combo):<46} "
+              f"trades {m.trades:>4}  net ${m.net:>10,.0f}   "
+              f"elapsed {el/60:.1f}m  eta {eta/60:.1f}m", flush=True)
         rows.append({**over, "trades": m.trades, "win_rate": m.win_rate,
                      "net": m.net, "profit_factor": m.profit_factor,
                      "expectancy": m.expectancy, "max_dd_pct": m.max_drawdown_pct,
@@ -270,8 +322,6 @@ def _sweep(cfg, data, equity, a, grid: dict, name: str) -> int:
                      "no_bias": r.skipped.get("no_bias", 0),
                      "not_at_zone": r.skipped.get("not at a zone", 0),
                      "no_confirmation": r.skipped.get("no confirmation", 0)})
-        if n % 10 == 0:
-            print(f"  {n}/{len(combos)}")
     df = pd.DataFrame(rows).sort_values(["net", "trades"], ascending=False)
     df.to_csv(OUT / f"sweep_{name}.csv", index=False)
     print("\nTOP 10 BY EXPECTANCY (in-sample -- see the warning below)")
@@ -291,5 +341,15 @@ def _save(r, name: str) -> None:
     print(f"  saved -> {OUT}/trades_{name}.csv")
 
 
+def _run() -> int:
+    try:
+        return main()
+    finally:
+        t = sys.stdout
+        if isinstance(t, _Tee):
+            sys.stdout = t.stdout
+            t.close()
+
+
 if __name__ == "__main__":
-    sys.exit(main())
+    sys.exit(_run())
